@@ -1,42 +1,49 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  motion,
   AnimatePresence,
+  motion,
+  useReducedMotion,
   useScroll,
   useTransform,
-  useReducedMotion,
 } from "framer-motion";
 import {
-  Menu,
-  X,
-  Phone,
-  Mail,
-  MapPin,
-  Bed,
-  Bath,
-  Maximize,
-  ArrowUpRight,
-  ArrowUp,
+  ArrowDown,
   ArrowLeft,
   ArrowRight,
-  MessageCircle,
-  Check,
+  ArrowUpRight,
+  Award,
+  Bath,
+  BedDouble,
   Building2,
-  Home as HomeIcon,
-  TrendingUp,
-  KeyRound,
-  Handshake,
+  Check,
+  ChevronDown,
+  Clock3,
+  Compass,
   Facebook,
+  Home,
   Instagram,
-  Twitter,
-  Music2,
-  Search,
+  KeyRound,
+  Landmark,
+  Mail,
+  MapPin,
+  Maximize,
+  Menu,
+  MessageCircle,
+  Phone,
   Quote,
+  Search,
+  Send,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  TrendingUp,
+  Users,
+  X,
 } from "lucide-react";
 
 /* ============================================================
-   COMPANY DATA
-   ============================================================ */
+   COMPANY
+============================================================ */
 
 const COMPANY = {
   name: "Prime Property & Developers",
@@ -44,902 +51,2409 @@ const COMPANY = {
   phone: "0300 3794458",
   phoneIntl: "923003794458",
   email: "primepropertypk@gmail.com",
-  address: [
-    "6 Mezzanine Floor, Mujahid Plaza,",
-    "Jinnah Avenue, Block H, G-7/2,",
-    "Blue Area, Islamabad, Pakistan",
-  ],
-  instagram: "@prime_property.developers",
-  facebook: "Prime Property & Developers",
-  twitter: "@PrimeProperty7",
-  tiktok: "@prime_property_dev.com",
+  address:
+    "6 Mezzanine Floor, Mujahid Plaza, Jinnah Avenue, Block H, G-7/2, Blue Area, Islamabad, Pakistan",
+  instagram: "https://www.instagram.com/prime_property.developers/",
+  facebook: "https://www.facebook.com/Primepropertyanddevelopers/",
+  twitter: "https://x.com/PrimeProperty7",
+  tiktok: "https://www.tiktok.com/@prime_property_dev.com",
 };
 
-const WHATSAPP_DEFAULT_MESSAGE =
-  "Hello Prime Property & Developers, I am interested in learning more about your property services.";
-
-function waLink(message) {
-  return `https://wa.me/${COMPANY.phoneIntl}?text=${encodeURIComponent(message)}`;
-}
+const WA = (message = "Hello Prime Property & Developers, I am interested in your property services.") =>
+  `https://wa.me/${COMPANY.phoneIntl}?text=${encodeURIComponent(message)}`;
 
 /* ============================================================
-   NAV / SEARCH DATA
-   ============================================================ */
+   DATA
+============================================================ */
 
-const NAV_LINKS = [
-  { label: "Home", id: "home" },
-  { label: "Properties", id: "properties" },
-  { label: "Services", id: "services" },
-  { label: "Areas", id: "areas" },
-  { label: "Clients", id: "testimonials" },
-  { label: "Contact", id: "contact" },
-];
-
-const LOOKING_FOR_OPTIONS = [
-  { value: "", label: "Buy, rent or invest" },
-  { value: "buy", label: "Buy" },
-  { value: "rent", label: "Rent" },
-  { value: "invest", label: "Invest" },
-];
-
-const PROPERTY_TYPE_OPTIONS = [
-  { value: "", label: "Any property type" },
-  { value: "house", label: "House" },
-  { value: "apartment", label: "Apartment" },
-  { value: "commercial", label: "Commercial" },
-];
-
-const LOCATION_OPTIONS = [
-  { value: "", label: "Any location" },
-  { value: "F-6", label: "F-6" },
-  { value: "F-7", label: "F-7" },
-  { value: "F-8", label: "F-8" },
-  { value: "E-7", label: "E-7" },
-  { value: "Blue Area", label: "Blue Area" },
-];
-
-/* ============================================================
-   PROPERTIES
-   ============================================================ */
-
-const PROPERTIES = [
+const properties = [
   {
-    id: "p1",
-    title: "Luxury Residence",
-    type: "house",
-    purpose: "buy",
+    id: 1,
+    title: "Contemporary F-7 Residence",
     location: "F-7, Islamabad",
-    locationTag: "F-7",
-    price: "PKR 12.5 Crore",
-    size: "1 Kanal",
+    type: "House",
+    purpose: "Buy",
+    price: "PKR 8.95 Cr",
     beds: 5,
     baths: 6,
+    area: "500 Sq. Yd.",
     image:
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1400&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=85",
+    tag: "Featured",
     description:
-      "A stately residence set on a full kanal in F-7, built for families who expect space, privacy and quiet refinement in equal measure.",
-    features: [
-      "Double-height living and dining spaces",
-      "Landscaped lawn with covered seating",
-      "Staff quarters and dedicated service areas",
-      "Covered parking for multiple vehicles",
-    ],
+      "A sophisticated family residence combining spacious interiors, premium finishes and an exceptional Islamabad location.",
   },
   {
-    id: "p2",
-    title: "Modern Family Home",
-    type: "house",
-    purpose: "buy",
-    location: "F-6, Islamabad",
-    locationTag: "F-6",
-    price: "PKR 8.75 Crore",
-    size: "10 Marla",
-    beds: 4,
-    baths: 5,
-    image:
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=80",
-    description:
-      "A well-proportioned 10 Marla home in F-6, designed around natural light and an easy flow between everyday living areas.",
-    features: [
-      "Open-plan kitchen and family lounge",
-      "Sun-lit terrace and study nook",
-      "Modern fittings throughout",
-      "Secure, gated street",
-    ],
-  },
-  {
-    id: "p3",
-    title: "Contemporary Villa",
-    type: "house",
-    purpose: "buy",
-    location: "E-7, Islamabad",
-    locationTag: "E-7",
-    price: "PKR 18 Crore",
-    size: "2 Kanal",
-    beds: 6,
-    baths: 7,
-    image:
-      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1400&q=80",
-    description:
-      "An expansive two-kanal villa in E-7, combining generous entertaining spaces with private wings for extended family living.",
-    features: [
-      "Formal and informal living areas",
-      "Home theatre and library room",
-      "Mature gardens with outdoor seating",
-      "Independent guest suite",
-    ],
-  },
-  {
-    id: "p4",
-    title: "Premium Commercial Floor",
-    type: "commercial",
-    purpose: "invest",
-    location: "Blue Area, Islamabad",
-    locationTag: "Blue Area",
-    price: "Contact for price",
-    size: "5,000 sq ft",
-    beds: null,
-    baths: null,
-    image:
-      "https://images.unsplash.com/photo-1524230507669-5ff97982bb5e?auto=format&fit=crop&w=1400&q=80",
-    description:
-      "A prominent commercial floor plate in Blue Area, positioned for businesses that want visibility in Islamabad's commercial core.",
-    features: [
-      "Prime Blue Area frontage",
-      "Flexible open floor plan",
-      "Elevator access and dedicated parking",
-      "Close to major banks and corporate offices",
-    ],
-  },
-  {
-    id: "p5",
-    title: "Executive Residence",
-    type: "house",
-    purpose: "buy",
+    id: 2,
+    title: "Modern F-8 Family Home",
     location: "F-8, Islamabad",
-    locationTag: "F-8",
-    price: "PKR 10.5 Crore",
-    size: "1 Kanal",
+    type: "House",
+    purpose: "Buy",
+    price: "PKR 6.75 Cr",
     beds: 5,
     baths: 5,
+    area: "400 Sq. Yd.",
     image:
-      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1400&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=85",
+    tag: "Prime Pick",
     description:
-      "A comfortable, well-maintained residence in F-8, suited to a household that values a settled, established neighbourhood.",
-    features: [
-      "Spacious bedrooms with attached baths",
-      "Separate drawing and dining rooms",
-      "Rooftop terrace",
-      "Ample front and side lawn",
-    ],
+      "A refined contemporary home with generous living spaces and excellent access to the city's key destinations.",
   },
   {
-    id: "p6",
-    title: "Commercial Investment Block",
-    type: "commercial",
-    purpose: "invest",
+    id: 3,
+    title: "Executive E-7 Residence",
+    location: "E-7, Islamabad",
+    type: "House",
+    purpose: "Buy",
+    price: "PKR 12.50 Cr",
+    beds: 6,
+    baths: 7,
+    area: "1000 Sq. Yd.",
+    image:
+      "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1600&q=85",
+    tag: "Luxury",
+    description:
+      "An expansive executive property positioned in one of Islamabad's most sought-after residential sectors.",
+  },
+  {
+    id: 4,
+    title: "Blue Area Business Tower",
     location: "Blue Area, Islamabad",
-    locationTag: "Blue Area",
-    price: "Contact for price",
-    size: "Multiple floors",
-    beds: null,
-    baths: null,
+    type: "Commercial",
+    purpose: "Invest",
+    price: "PKR 18.00 Cr",
+    beds: 0,
+    baths: 4,
+    area: "12,000 Sq. Ft.",
     image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1400&q=80",
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=85",
+    tag: "Investment",
     description:
-      "A multi-floor commercial opportunity in the heart of Blue Area, suited to investors seeking a foothold in Islamabad's business district.",
-    features: [
-      "Multiple leasable floors",
-      "High footfall business district",
-      "Suitable for offices or retail",
-      "Strong long-term rental potential",
-    ],
+      "A commercial opportunity in Islamabad's central business district, suitable for corporate and investment purposes.",
   },
   {
-    id: "p7",
-    title: "Skyline Apartment",
-    type: "apartment",
-    purpose: "rent",
-    location: "F-8, Islamabad",
-    locationTag: "F-8",
-    price: "PKR 275,000 / month",
-    size: "2,200 sq ft",
+    id: 5,
+    title: "Luxury F-6 Villa",
+    location: "F-6, Islamabad",
+    type: "House",
+    purpose: "Buy",
+    price: "PKR 10.25 Cr",
+    beds: 6,
+    baths: 7,
+    area: "800 Sq. Yd.",
+    image:
+      "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1600&q=85",
+    tag: "Luxury",
+    description:
+      "A statement villa with elegant architecture, privacy and premium living spaces in F-6.",
+  },
+  {
+    id: 6,
+    title: "Blue Area Executive Office",
+    location: "Blue Area, Islamabad",
+    type: "Commercial",
+    purpose: "Rent",
+    price: "PKR 4.50 Lac/mo",
+    beds: 0,
+    baths: 2,
+    area: "3,500 Sq. Ft.",
+    image:
+      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1600&q=85",
+    tag: "Commercial",
+    description:
+      "A professional office environment for businesses looking for a prestigious Blue Area address.",
+  },
+  {
+    id: 7,
+    title: "Elegant F-7 Apartment",
+    location: "F-7, Islamabad",
+    type: "Apartment",
+    purpose: "Rent",
+    price: "PKR 3.25 Lac/mo",
     beds: 3,
     baths: 3,
+    area: "2,800 Sq. Ft.",
     image:
-      "https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&w=1400&q=80",
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1600&q=85",
+    tag: "Rental",
     description:
-      "A bright, contemporary apartment available for rent in F-8, offering low-maintenance living close to Islamabad's commercial hubs.",
-    features: [
-      "Modern open-plan interior",
-      "Balcony with sector views",
-      "Dedicated covered parking",
-      "Round-the-clock building security",
-    ],
+      "A beautifully appointed apartment offering comfort, convenience and an upscale lifestyle.",
   },
+];
+
+const areas = [
+  {
+    name: "F-6",
+    subtitle: "Established luxury",
+    image:
+      "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    name: "F-7",
+    subtitle: "Premium residential",
+    image:
+      "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    name: "F-8",
+    subtitle: "Family living",
+    image:
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    name: "E-7",
+    subtitle: "Ultra prime",
+    image:
+      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    name: "Blue Area",
+    subtitle: "Business district",
+    image:
+      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80",
+  },
+];
+
+const services = [
+  {
+    icon: Home,
+    number: "01",
+    title: "Property Sales",
+    text: "Strategic buying and selling support for residential and commercial properties.",
+  },
+  {
+    icon: KeyRound,
+    number: "02",
+    title: "Property Rentals",
+    text: "Find quality rental opportunities matched to your lifestyle and business needs.",
+  },
+  {
+    icon: TrendingUp,
+    number: "03",
+    title: "Investment Advisory",
+    text: "Identify opportunities with a practical approach to location, value and growth.",
+  },
+  {
+    icon: Landmark,
+    number: "04",
+    title: "Property Consultancy",
+    text: "Professional guidance throughout your property journey, from search to closing.",
+  },
+];
+
+const testimonials = [
+  {
+    name: "Satisfied Client",
+    role: "Property Buyer",
+    quote:
+      "The team made the entire property search feel simple and professional. Their understanding of Islamabad's market was impressive.",
+  },
+  {
+    name: "Satisfied Investor",
+    role: "Property Investor",
+    quote:
+      "Prime Property & Developers provided clear guidance and helped us evaluate opportunities with much more confidence.",
+  },
+  {
+    name: "Satisfied Client",
+    role: "Home Owner",
+    quote:
+      "Professional communication, good market knowledge and a very smooth overall experience.",
+  },
+  {
+    name: "Satisfied Client",
+    role: "Property Seller",
+    quote:
+      "Their team understood what we needed and handled the process with care and professionalism.",
+  },
+];
+
+const stats = [
+  { value: 12, suffix: "+", label: "Years of Experience" },
+  { value: 480, suffix: "+", label: "Properties Handled" },
+  { value: 5, suffix: "", label: "Prime Areas" },
+  { value: 96, suffix: "%", label: "Client Satisfaction" },
 ];
 
 /* ============================================================
-   AREAS / SERVICES / WHY / PROCESS
-   ============================================================ */
+   GLOBAL CSS
+============================================================ */
 
-const AREAS = [
-  { id: "f6", name: "F-6", description: "An established address for old-money quiet and mature, tree-lined streets.", image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80" },
-  { id: "f7", name: "F-7", description: "Islamabad's most requested postcode, close to markets, schools and diplomatic enclaves.", image: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80" },
-  { id: "f8", name: "F-8", description: "A broad mix of family homes and rentals, five minutes from the Margalla trails.", image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80" },
-  { id: "e7", name: "E-7", description: "Exclusive, low-density plots favoured by families who want space and privacy.", image: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80" },
-  { id: "blue-area", name: "Blue Area", description: "Islamabad's commercial spine, where every serious investor wants a floor.", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80" },
-];
+const GlobalStyles = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700;800&display=swap');
 
-const SERVICES = [
-  { icon: HomeIcon, title: "Property Sales", description: "Professional marketing and negotiation support to sell residential and commercial property at the right price." },
-  { icon: KeyRound, title: "Property Purchase", description: "A shortlist built around your budget and priorities, with honest guidance at every viewing." },
-  { icon: Building2, title: "Rentals", description: "Tenant screening, paperwork and ongoing support for landlords, and a smoother search for tenants." },
-  { icon: TrendingUp, title: "Investment Consultancy", description: "Sector-by-sector insight to help you place capital where Islamabad's growth is heading next." },
-];
+    :root {
+      --navy: #081225;
+      --navy-2: #0c1830;
+      --navy-3: #111f3b;
+      --gold: #c9a45c;
+      --gold-light: #e6c985;
+      --cream: #f7f3eb;
+      --white: #ffffff;
+      --muted: #718096;
+      --line: rgba(201,164,92,.18);
+      --dark-line: rgba(255,255,255,.1);
+      --shadow: 0 25px 80px rgba(5,14,30,.13);
+      --radius: 22px;
+    }
 
-const WHY_POINTS = [
-  "Deep, current knowledge of the Islamabad market",
-  "Specialists in F-6, F-7, F-8, E-7 and Blue Area",
-  "Consultancy built around your priorities, not a script",
-  "Residential and commercial expertise under one roof",
-  "Support that continues after the paperwork is signed",
-  "An investment-first lens on every recommendation",
-];
+    * {
+      box-sizing: border-box;
+    }
 
-const PROCESS_STEPS = [
-  { number: "01", title: "Tell us what you need", description: "Share what you're looking to buy, sell, rent or invest in, and where." },
-  { number: "02", title: "Explore suitable properties", description: "We put together a shortlist of properties that genuinely match your brief." },
-  { number: "03", title: "Get expert guidance", description: "Our consultants walk you through options, locations and next steps." },
-  { number: "04", title: "Make your move", description: "Proceed with confidence, supported at every stage of the transaction." },
-];
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 85px;
+    }
 
-const STATS = [
-  { value: 12, suffix: "+", label: "Years active in Islamabad's property market" },
-  { value: 480, suffix: "+", label: "Properties sold, let or transacted" },
-  { value: 5, suffix: "", label: "Prime sectors covered end to end" },
-  { value: 96, suffix: "%", label: "Clients who would recommend us" },
-];
+    body {
+      margin: 0;
+      font-family: "Manrope", sans-serif;
+      background: var(--white);
+      color: var(--navy);
+      overflow-x: hidden;
+    }
 
-const TESTIMONIALS = [
-  {
-    name: "F-7 Homeowner",
-    context: "Purchased a 1 Kanal residence",
-    quote:
-      "We had looked at a dozen agents before Prime Property. What stood out was that they said no to two houses that didn't fit our budget instead of just pushing a sale.",
-  },
-  {
-    name: "Blue Area Investor",
-    context: "Acquired a commercial floor",
-    quote:
-      "Their read on which floors in Blue Area were undervalued turned out to be right. The rental yield has outperformed what we modelled going in.",
-  },
-  {
-    name: "F-8 Tenant",
-    context: "Rented a 3-bed apartment",
-    quote:
-      "Renting in Islamabad can be slow and full of surprises. They handled the paperwork, negotiated the terms, and moved us in within two weeks.",
-  },
-  {
-    name: "E-7 Homeowner",
-    context: "Sold a family villa",
-    quote:
-      "The marketing they put together for our villa was genuinely well done. We had a serious offer within the first month of listing.",
-  },
-];
+    body, button, input, select, textarea {
+      font-family: "Manrope", sans-serif;
+    }
 
-const INTEREST_OPTIONS = ["Buying", "Selling", "Renting", "Investment", "Commercial", "General inquiry"];
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .app {
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .section {
+      position: relative;
+      padding: 110px 0;
+    }
+
+    .section--cream {
+      background: var(--cream);
+    }
+
+    .section--navy {
+      background: var(--navy);
+      color: white;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: .2em;
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 1px;
+      background: currentColor;
+    }
+
+    .section-heading {
+      max-width: 720px;
+      margin-bottom: 55px;
+    }
+
+    .section-heading.center {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+
+    .section-heading.center .eyebrow {
+      justify-content: center;
+    }
+
+    .section-title {
+      margin: 0;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(40px, 5vw, 68px);
+      line-height: .98;
+      letter-spacing: -.045em;
+      font-weight: 600;
+    }
+
+    .section-description {
+      margin: 22px 0 0;
+      color: var(--muted);
+      line-height: 1.9;
+      font-size: 15px;
+      max-width: 650px;
+    }
+
+    .section--navy .section-description {
+      color: rgba(255,255,255,.62);
+    }
+
+    /* progress */
+    .progress {
+      position: fixed;
+      z-index: 100;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--gold);
+      transform-origin: left;
+    }
+
+    /* navbar */
+    .navbar {
+      position: fixed;
+      z-index: 90;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 20px 0;
+      transition: .35s ease;
+    }
+
+    .navbar.scrolled {
+      background: rgba(8,18,37,.94);
+      backdrop-filter: blur(18px);
+      padding: 12px 0;
+      box-shadow: 0 10px 35px rgba(0,0,0,.16);
+    }
+
+    .nav-inner {
+      width: min(1250px, calc(100% - 38px));
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: white;
+      min-width: 220px;
+    }
+
+    .brand-mark {
+      width: 43px;
+      height: 43px;
+      border: 1px solid var(--gold);
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-mark::before {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      border: 1px solid rgba(201,164,92,.5);
+    }
+
+    .brand-mark span {
+      position: relative;
+      font-family: "Playfair Display", serif;
+      color: var(--gold);
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .brand-text strong {
+      display: block;
+      font-family: "Playfair Display", serif;
+      font-size: 16px;
+      letter-spacing: .01em;
+    }
+
+    .brand-text small {
+      display: block;
+      color: rgba(255,255,255,.55);
+      font-size: 8px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-link {
+      color: rgba(255,255,255,.78);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 11px 13px;
+      border-radius: 999px;
+      transition: .25s ease;
+    }
+
+    .nav-link:hover {
+      color: white;
+      background: rgba(255,255,255,.07);
+    }
+
+    .nav-contact {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--navy);
+      background: var(--gold);
+      padding: 12px 17px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+      transition: .3s ease;
+    }
+
+    .nav-contact:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+    }
+
+    .menu-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+      color: white;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* mobile nav */
+    .mobile-menu {
+      position: fixed;
+      z-index: 89;
+      inset: 0;
+      background: var(--navy);
+      padding: 105px 24px 30px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .mobile-menu-links {
+      display: grid;
+      gap: 5px;
+    }
+
+    .mobile-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(30px, 8vw, 46px);
+      padding: 14px 0;
+      border-bottom: 1px solid var(--dark-line);
+    }
+
+    .mobile-link svg {
+      color: var(--gold);
+      width: 22px;
+    }
+
+    .mobile-contact {
+      margin-top: auto;
+      padding-top: 30px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .mobile-contact a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: rgba(255,255,255,.7);
+      padding: 13px 0;
+    }
+
+    /* hero */
+    .hero {
+      min-height: 850px;
+      height: 100svh;
+      max-height: 980px;
+      position: relative;
+      background: var(--navy);
+      color: white;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .hero-image {
+      position: absolute;
+      inset: -5%;
+      background:
+        linear-gradient(90deg, rgba(4,10,22,.92) 0%, rgba(4,10,22,.67) 42%, rgba(4,10,22,.3) 100%),
+        linear-gradient(0deg, rgba(4,10,22,.58), transparent 40%),
+        url("https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=2200&q=90")
+        center/cover no-repeat;
+      transform-origin: center;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      opacity: .07;
+      background-image:
+        linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: linear-gradient(to bottom, black, transparent 90%);
+    }
+
+    .hero-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(1px);
+      border: 1px solid rgba(201,164,92,.25);
+    }
+
+    .hero-orb.one {
+      width: 320px;
+      height: 320px;
+      right: -120px;
+      top: 17%;
+    }
+
+    .hero-orb.two {
+      width: 180px;
+      height: 180px;
+      right: 19%;
+      bottom: 4%;
+      opacity: .5;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      width: min(1180px, calc(100% - 48px));
+      margin: auto;
+      padding-top: 75px;
+    }
+
+    .hero-copy {
+      max-width: 760px;
+    }
+
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: .25em;
+      font-weight: 800;
+      margin-bottom: 22px;
+    }
+
+    .hero-kicker span {
+      width: 42px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .hero-title {
+      font-family: "Playfair Display", serif;
+      font-weight: 500;
+      font-size: clamp(54px, 8vw, 104px);
+      line-height: .88;
+      letter-spacing: -.055em;
+      margin: 0;
+    }
+
+    .hero-title em {
+      color: var(--gold-light);
+      font-style: italic;
+    }
+
+    .hero-description {
+      max-width: 590px;
+      color: rgba(255,255,255,.68);
+      line-height: 1.85;
+      margin: 28px 0;
+      font-size: 15px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 13px 19px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .02em;
+      transition: .3s ease;
+    }
+
+    .btn svg {
+      transition: transform .3s ease;
+    }
+
+    .btn:hover svg {
+      transform: translateX(3px);
+    }
+
+    .btn-gold {
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .btn-gold:hover {
+      background: var(--gold-light);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(201,164,92,.22);
+    }
+
+    .btn-outline {
+      border: 1px solid rgba(255,255,255,.28);
+      color: white;
+      background: rgba(255,255,255,.04);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--gold);
+      background: rgba(201,164,92,.08);
+      transform: translateY(-3px);
+    }
+
+    .hero-trust {
+      margin-top: 48px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      color: rgba(255,255,255,.5);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      font-weight: 700;
+    }
+
+    .hero-trust span {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .hero-trust svg {
+      color: var(--gold);
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      z-index: 2;
+      right: 38px;
+      bottom: 35px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255,255,255,.45);
+      font-size: 8px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 55px;
+      background: linear-gradient(var(--gold), transparent);
+    }
+
+    /* search */
+    .search-wrap {
+      position: relative;
+      z-index: 5;
+      margin-top: -70px;
+    }
+
+    .search-panel {
+      background: rgba(255,255,255,.96);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,.8);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 30px 80px rgba(8,18,37,.18);
+    }
+
+    .search-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2px 5px 15px;
+    }
+
+    .search-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      color: var(--navy);
+    }
+
+    .search-label {
+      color: var(--gold);
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    .search-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.25fr auto;
+      gap: 10px;
+    }
+
+    .field {
+      min-width: 0;
+      position: relative;
+    }
+
+    .field select {
+      width: 100%;
+      min-height: 56px;
+      appearance: none;
+      border: 1px solid #e6e9ee;
+      background: #fafafa;
+      color: var(--navy);
+      border-radius: 15px;
+      padding: 0 42px 0 43px;
+      outline: none;
+      font-size: 12px;
+      font-weight: 700;
+      transition: .25s ease;
+    }
+
+    .field select:focus {
+      border-color: var(--gold);
+      background: white;
+      box-shadow: 0 0 0 4px rgba(201,164,92,.09);
+    }
+
+    .field-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold);
+      width: 17px;
+      pointer-events: none;
+    }
+
+    .field-chevron {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #98a1af;
+      width: 14px;
+      pointer-events: none;
+    }
+
+    .search-btn {
+      min-height: 56px;
+      min-width: 125px;
+      border-radius: 15px;
+      background: var(--navy);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      transition: .3s ease;
+    }
+
+    .search-btn:hover {
+      background: var(--gold);
+      color: var(--navy);
+      transform: translateY(-2px);
+    }
+
+    /* marquee */
+    .marquee {
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      border-top: 1px solid var(--line);
+      background: white;
+    }
+
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marquee 28s linear infinite;
+    }
+
+    .marquee-item {
+      display: flex;
+      align-items: center;
+      gap: 25px;
+      padding: 17px 30px;
+      font-family: "Playfair Display", serif;
+      font-size: 18px;
+      color: var(--navy);
+      white-space: nowrap;
+    }
+
+    .marquee-item span {
+      color: var(--gold);
+      font-size: 12px;
+    }
+
+    @keyframes marquee {
+      to { transform: translateX(-50%); }
+    }
+
+    /* stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .stat {
+      padding: 40px 25px;
+      border-right: 1px solid var(--line);
+      position: relative;
+    }
+
+    .stat:last-child {
+      border-right: 0;
+    }
+
+    .stat-icon {
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .stat-number {
+      font-family: "Playfair Display", serif;
+      font-size: clamp(38px, 5vw, 56px);
+      line-height: 1;
+      color: var(--navy);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-weight: 800;
+      margin-top: 9px;
+    }
+
+    /* properties */
+    .property-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .property-card {
+      min-width: 0;
+      background: white;
+      border: 1px solid #e9e9e6;
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: .45s cubic-bezier(.2,.7,.2,1);
+      cursor: pointer;
+      box-shadow: 0 5px 25px rgba(8,18,37,.03);
+    }
+
+    .property-card:hover {
+      transform: translateY(-9px);
+      border-color: rgba(201,164,92,.5);
+      box-shadow: var(--shadow);
+    }
+
+    .property-image {
+      height: 260px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .property-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .8s cubic-bezier(.2,.7,.2,1);
+    }
+
+    .property-card:hover .property-image img {
+      transform: scale(1.08);
+    }
+
+    .property-image::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(0deg, rgba(8,18,37,.45), transparent 60%);
+    }
+
+    .property-tag {
+      position: absolute;
+      z-index: 2;
+      top: 14px;
+      left: 14px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(8,18,37,.82);
+      color: var(--gold-light);
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-weight: 800;
+      backdrop-filter: blur(10px);
+    }
+
+    .property-arrow {
+      position: absolute;
+      z-index: 2;
+      right: 14px;
+      bottom: 14px;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: white;
+      color: var(--navy);
+      transition: .3s ease;
+    }
+
+    .property-card:hover .property-arrow {
+      background: var(--gold);
+      transform: rotate(45deg);
+    }
+
+    .property-body {
+      padding: 20px;
+    }
+
+    .property-location {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--gold);
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 9px;
+    }
+
+    .property-title {
+      margin: 0;
+      font-family: "Playfair Display", serif;
+      font-size: 23px;
+      line-height: 1.1;
+      font-weight: 600;
+    }
+
+    .property-price {
+      margin-top: 15px;
+      font-size: 17px;
+      color: var(--navy);
+      font-weight: 800;
+    }
+
+    .property-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 13px;
+      margin-top: 17px;
+      padding-top: 14px;
+      border-top: 1px solid #ecece9;
+      color: #7b8491;
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .property-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* split section */
+    .split {
+      display: grid;
+      grid-template-columns: .95fr 1.05fr;
+      gap: 75px;
+      align-items: center;
+    }
+
+    .image-stack {
+      position: relative;
+      min-height: 570px;
+    }
+
+    .image-main {
+      width: 78%;
+      height: 500px;
+      object-fit: cover;
+      border-radius: 22px;
+    }
+
+    .image-small {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 43%;
+      height: 245px;
+      object-fit: cover;
+      border: 12px solid var(--white);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .floating-badge {
+      position: absolute;
+      top: 35px;
+      right: 5%;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: var(--navy);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      font-weight: 900;
+      box-shadow: 0 20px 45px rgba(201,164,92,.25);
+    }
+
+    .floating-badge svg {
+      display: block;
+      margin: 0 auto 5px;
+    }
+
+    .check-list {
+      display: grid;
+      gap: 15px;
+      margin: 30px 0;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: #4e5968;
+      line-height: 1.7;
+      font-size: 13px;
+    }
+
+    .check-item-icon {
+      flex: 0 0 25px;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background: rgba(201,164,92,.12);
+      color: var(--gold);
+      display: grid;
+      place-items: center;
+    }
+
+    /* services */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 1px;
+      background: var(--dark-line);
+      border: 1px solid var(--dark-line);
+    }
+
+    .service {
+      min-width: 0;
+      padding: 35px 28px;
+      background: var(--navy);
+      min-height: 300px;
+      transition: .35s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service:hover {
+      background: var(--navy-3);
+    }
+
+    .service-number {
+      color: rgba(255,255,255,.2);
+      font-family: "Playfair Display", serif;
+      font-size: 42px;
+    }
+
+    .service-icon {
+      color: var(--gold);
+      margin: 28px 0 22px;
+    }
+
+    .service h3 {
+      margin: 0 0 12px;
+      font-family: "Playfair Display", serif;
+      font-size: 25px;
+      font-weight: 500;
+    }
+
+    .service p {
+      color: rgba(255,255,255,.55);
+      font-size: 12px;
+      line-height: 1.8;
+      margin: 0;
+    }
+
+    .service::after {
+      content: "";
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      right: -50px;
+      bottom: -50px;
+      border-radius: 50%;
+      border: 1px solid rgba(201,164,92,.16);
+      transition: .5s ease;
+    }
+
+    .service:hover::after {
+      transform: scale(2);
+    }
+
+    /* areas */
+    .areas-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap: 12px;
+    }
+
+    .area {
+      height: 420px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+
+    .area img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: .8s cubic-bezier(.2,.7,.2,1);
+    }
+
+    .area:hover img {
+      transform: scale(1.1);
+    }
+
+    .area::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(0deg, rgba(4,10,22,.88), transparent 60%);
+    }
+
+    .area-content {
+      position: absolute;
+      z-index: 2;
+      left: 22px;
+      right: 22px;
+      bottom: 22px;
+      color: white;
+    }
+
+    .area-content h3 {
+      font-family: "Playfair Display", serif;
+      font-size: 30px;
+      margin: 0 0 5px;
+    }
+
+    .area-content p {
+      margin: 0;
+      color: rgba(255,255,255,.62);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    /* testimonials */
+    .testimonial-wrap {
+      max-width: 880px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .quote-icon {
+      color: var(--gold);
+      margin: 0 auto 25px;
+    }
+
+    .testimonial-quote {
+      font-family: "Playfair Display", serif;
+      font-size: clamp(26px, 4vw, 44px);
+      line-height: 1.25;
+      font-weight: 400;
+      margin: 0;
+    }
+
+    .stars {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin: 28px 0 16px;
+      color: var(--gold);
+    }
+
+    .testimonial-name {
+      font-size: 12px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .testimonial-role {
+      color: rgba(255,255,255,.45);
+      font-size: 10px;
+      margin-top: 4px;
+    }
+
+    .slider-controls {
+      display: flex;
+      justify-content: center;
+      gap: 9px;
+      margin-top: 35px;
+    }
+
+    .slider-btn {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      border: 1px solid var(--dark-line);
+      background: transparent;
+      transition: .25s ease;
+    }
+
+    .slider-btn:hover {
+      background: var(--gold);
+      color: var(--navy);
+      border-color: var(--gold);
+    }
+
+    /* process */
+    .process-grid {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 25px;
+    }
+
+    .process-card {
+      position: relative;
+      padding: 30px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .process-card:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      width: 35px;
+      height: 1px;
+      right: -30px;
+      top: -1px;
+      background: var(--gold);
+    }
+
+    .process-number {
+      font-family: "Playfair Display", serif;
+      color: var(--gold);
+      font-size: 40px;
+    }
+
+    .process-card h3 {
+      font-family: "Playfair Display", serif;
+      font-size: 23px;
+      margin: 20px 0 10px;
+    }
+
+    .process-card p {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.8;
+      margin: 0;
+    }
+
+    /* CTA */
+    .cta {
+      position: relative;
+      overflow: hidden;
+      padding: 80px;
+      border-radius: 30px;
+      background:
+        linear-gradient(90deg, rgba(8,18,37,.96), rgba(8,18,37,.72)),
+        url("https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1800&q=85")
+        center/cover;
+      color: white;
+    }
+
+    .cta::before {
+      content: "";
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      right: -180px;
+      top: -180px;
+      border: 1px solid rgba(201,164,92,.2);
+      border-radius: 50%;
+    }
+
+    .cta-content {
+      position: relative;
+      max-width: 700px;
+    }
+
+    .cta h2 {
+      font-family: "Playfair Display", serif;
+      font-size: clamp(42px, 6vw, 68px);
+      line-height: .98;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .cta p {
+      color: rgba(255,255,255,.6);
+      max-width: 560px;
+      line-height: 1.8;
+      font-size: 13px;
+      margin: 20px 0 28px;
+    }
+
+    /* contact */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: .85fr 1.15fr;
+      gap: 70px;
+      align-items: start;
+    }
+
+    .contact-list {
+      display: grid;
+      gap: 17px;
+      margin-top: 35px;
+    }
+
+    .contact-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .contact-icon {
+      width: 45px;
+      height: 45px;
+      flex: 0 0 45px;
+      border-radius: 50%;
+      background: rgba(201,164,92,.1);
+      color: var(--gold);
+      display: grid;
+      place-items: center;
+    }
+
+    .contact-item strong {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .contact-item span,
+    .contact-item a {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .contact-form {
+      background: var(--cream);
+      border-radius: 25px;
+      padding: 30px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
+    }
+
+    .form-field {
+      min-width: 0;
+    }
+
+    .form-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-field label {
+      display: block;
+      color: #596372;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      margin: 0 0 7px 4px;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      width: 100%;
+      border: 1px solid #e2dfd8;
+      background: white;
+      border-radius: 12px;
+      padding: 14px;
+      outline: none;
+      color: var(--navy);
+      font-size: 12px;
+      resize: vertical;
+      transition: .25s ease;
+    }
+
+    .form-field textarea {
+      min-height: 120px;
+    }
+
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px rgba(201,164,92,.08);
+    }
+
+    .form-submit {
+      width: 100%;
+      margin-top: 13px;
+      min-height: 52px;
+      border-radius: 13px;
+      background: var(--navy);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      font-size: 11px;
+      font-weight: 800;
+      transition: .3s ease;
+    }
+
+    .form-submit:hover {
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    /* footer */
+    .footer {
+      background: #050b17;
+      color: white;
+      padding: 70px 0 25px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 45px;
+      padding-bottom: 55px;
+      border-bottom: 1px solid var(--dark-line);
+    }
+
+    .footer-brand p {
+      max-width: 330px;
+      color: rgba(255,255,255,.45);
+      font-size: 11px;
+      line-height: 1.9;
+      margin: 20px 0;
+    }
+
+    .footer-title {
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      font-size: 9px;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+
+    .footer-links {
+      display: grid;
+      gap: 10px;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,.55);
+      font-size: 11px;
+      transition: .2s ease;
+    }
+
+    .footer-links a:hover {
+      color: white;
+      transform: translateX(3px);
+    }
+
+    .socials {
+      display: flex;
+      gap: 8px;
+    }
+
+    .social {
+      width: 37px;
+      height: 37px;
+      border-radius: 50%;
+      border: 1px solid var(--dark-line);
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,.55);
+      transition: .25s ease;
+    }
+
+    .social:hover {
+      color: var(--navy);
+      background: var(--gold);
+      border-color: var(--gold);
+      transform: translateY(-3px);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding-top: 22px;
+      color: rgba(255,255,255,.32);
+      font-size: 9px;
+    }
+
+    /* modal */
+    .modal-backdrop {
+      position: fixed;
+      z-index: 120;
+      inset: 0;
+      background: rgba(2,7,16,.78);
+      backdrop-filter: blur(12px);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .modal {
+      width: min(920px, 100%);
+      max-height: min(850px, 92vh);
+      overflow: hidden;
+      background: white;
+      border-radius: 25px;
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      box-shadow: 0 40px 100px rgba(0,0,0,.35);
+    }
+
+    .modal-image {
+      min-height: 580px;
+      position: relative;
+    }
+
+    .modal-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .modal-close {
+      position: absolute;
+      z-index: 3;
+      top: 14px;
+      right: 14px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.92);
+      color: var(--navy);
+    }
+
+    .modal-content {
+      padding: 45px;
+      overflow-y: auto;
+    }
+
+    .modal-content h2 {
+      font-family: "Playfair Display", serif;
+      font-size: 43px;
+      line-height: 1;
+      margin: 10px 0 15px;
+    }
+
+    .modal-price {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--gold);
+      margin: 15px 0 25px;
+    }
+
+    .modal-description {
+      color: var(--muted);
+      line-height: 1.9;
+      font-size: 13px;
+    }
+
+    .modal-meta {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 8px;
+      margin: 30px 0;
+    }
+
+    .modal-meta-item {
+      padding: 15px 8px;
+      border-radius: 13px;
+      background: var(--cream);
+      text-align: center;
+      color: var(--navy);
+    }
+
+    .modal-meta-item svg {
+      color: var(--gold);
+      margin-bottom: 5px;
+    }
+
+    .modal-meta-item span {
+      display: block;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    /* floating */
+    .floating-actions {
+      position: fixed;
+      z-index: 80;
+      right: 20px;
+      bottom: 20px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .float-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,.18);
+      transition: .3s ease;
+    }
+
+    .float-btn:hover {
+      transform: translateY(-4px) scale(1.04);
+    }
+
+    .whatsapp {
+      color: white;
+      background: #1fa968;
+    }
+
+    .top-btn {
+      background: var(--navy);
+      color: white;
+    }
+
+    /* toast */
+    .toast {
+      position: fixed;
+      z-index: 150;
+      left: 50%;
+      bottom: 25px;
+      transform: translateX(-50%);
+      background: var(--navy);
+      color: white;
+      padding: 13px 18px;
+      border-radius: 999px;
+      box-shadow: 0 15px 40px rgba(0,0,0,.2);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .toast svg {
+      color: var(--gold);
+    }
+
+    /* responsive */
+    @media (max-width: 1100px) {
+      .nav-links,
+      .nav-contact {
+        display: none;
+      }
+
+      .menu-btn {
+        display: flex;
+      }
+
+      .property-grid {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+
+      .areas-grid {
+        grid-template-columns: repeat(3, minmax(0,1fr));
+      }
+
+      .area {
+        height: 350px;
+      }
+
+      .services-grid {
+        grid-template-columns: repeat(2,1fr);
+      }
+
+      .search-fields {
+        grid-template-columns: repeat(2,1fr);
+      }
+
+      .search-btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .section {
+        padding: 80px 0;
+      }
+
+      .split,
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 45px;
+      }
+
+      .image-stack {
+        min-height: 520px;
+        max-width: 650px;
+      }
+
+      .process-grid {
+        grid-template-columns: repeat(2,1fr);
+        gap: 0 25px;
+      }
+
+      .process-card:not(:last-child)::after {
+        display: none;
+      }
+
+      .footer-grid {
+        grid-template-columns: repeat(2,1fr);
+      }
+
+      .modal {
+        grid-template-columns: 1fr;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .modal-image {
+        min-height: 300px;
+        height: 300px;
+      }
+
+      .modal-content {
+        padding: 30px;
+      }
+    }
+
+    @media (max-width: 650px) {
+      .container,
+      .hero-content {
+        width: min(100% - 30px, 1180px);
+      }
+
+      .navbar {
+        padding: 13px 0;
+      }
+
+      .nav-inner {
+        width: calc(100% - 24px);
+      }
+
+      .brand {
+        min-width: 0;
+      }
+
+      .brand-mark {
+        width: 38px;
+        height: 38px;
+      }
+
+      .brand-text strong {
+        font-size: 14px;
+      }
+
+      .brand-text small {
+        font-size: 7px;
+      }
+
+      .hero {
+        min-height: 760px;
+        height: 100svh;
+      }
+
+      .hero-image {
+        background:
+          linear-gradient(90deg, rgba(4,10,22,.91), rgba(4,10,22,.55)),
+          linear-gradient(0deg, rgba(4,10,22,.65), transparent),
+          url("https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=85")
+          center/cover no-repeat;
+      }
+
+      .hero-content {
+        padding-top: 70px;
+      }
+
+      .hero-title {
+        font-size: clamp(48px, 15vw, 72px);
+      }
+
+      .hero-description {
+        font-size: 12px;
+        line-height: 1.75;
+        margin: 22px 0;
+      }
+
+      .hero-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .hero-actions .btn {
+        width: 100%;
+      }
+
+      .hero-trust {
+        margin-top: 28px;
+        gap: 10px 18px;
+      }
+
+      .hero-trust span {
+        font-size: 8px;
+      }
+
+      .scroll-indicator {
+        display: none;
+      }
+
+      .search-wrap {
+        margin-top: -45px;
+      }
+
+      .search-panel {
+        padding: 13px;
+        border-radius: 19px;
+      }
+
+      .search-top {
+        padding: 1px 3px 11px;
+      }
+
+      .search-fields {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .field select,
+      .search-btn {
+        min-height: 51px;
+      }
+
+      .marquee-item {
+        font-size: 15px;
+        padding: 14px 20px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .stat {
+        padding: 27px 16px;
+      }
+
+      .stat:nth-child(2) {
+        border-right: 0;
+      }
+
+      .stat:nth-child(3),
+      .stat:nth-child(4) {
+        border-top: 1px solid var(--line);
+      }
+
+      .section-title {
+        font-size: clamp(39px, 12vw, 55px);
+      }
+
+      .section-heading {
+        margin-bottom: 35px;
+      }
+
+      .section-description {
+        font-size: 12px;
+        line-height: 1.8;
+      }
+
+      .property-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .property-image {
+        height: 245px;
+      }
+
+      .property-body {
+        padding: 18px;
+      }
+
+      .property-title {
+        font-size: 21px;
+      }
+
+      .image-stack {
+        min-height: 430px;
+      }
+
+      .image-main {
+        width: 82%;
+        height: 370px;
+      }
+
+      .image-small {
+        height: 175px;
+        width: 46%;
+        border-width: 7px;
+      }
+
+      .floating-badge {
+        width: 90px;
+        height: 90px;
+        font-size: 7px;
+        top: 15px;
+      }
+
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .service {
+        min-height: 245px;
+        padding: 28px 22px;
+      }
+
+      .areas-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .area {
+        height: 280px;
+        border-radius: 15px;
+      }
+
+      .area:last-child {
+        grid-column: 1 / -1;
+        height: 250px;
+      }
+
+      .area-content {
+        left: 15px;
+        right: 15px;
+        bottom: 15px;
+      }
+
+      .area-content h3 {
+        font-size: 25px;
+      }
+
+      .process-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .process-card {
+        padding: 24px 0;
+      }
+
+      .cta {
+        padding: 42px 24px;
+        border-radius: 22px;
+      }
+
+      .cta h2 {
+        font-size: 43px;
+      }
+
+      .contact-form {
+        padding: 18px;
+        border-radius: 18px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-field.full {
+        grid-column: auto;
+      }
+
+      .footer {
+        padding-top: 55px;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 35px;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .modal-backdrop {
+        padding: 10px;
+        align-items: end;
+      }
+
+      .modal {
+        border-radius: 22px 22px 15px 15px;
+        max-height: 94vh;
+      }
+
+      .modal-image {
+        min-height: 230px;
+        height: 230px;
+      }
+
+      .modal-content {
+        padding: 24px 20px 30px;
+      }
+
+      .modal-content h2 {
+        font-size: 34px;
+      }
+
+      .modal-meta {
+        grid-template-columns: repeat(3,1fr);
+      }
+
+      .floating-actions {
+        right: 14px;
+        bottom: 14px;
+      }
+
+      .float-btn {
+        width: 47px;
+        height: 47px;
+      }
+
+      .toast {
+        width: calc(100% - 30px);
+        justify-content: center;
+        white-space: normal;
+        text-align: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  `}</style>
+);
 
 /* ============================================================
    HELPERS
-   ============================================================ */
+============================================================ */
 
-function scrollToId(id) {
-  const element = document.getElementById(id);
-  if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-function useScrollFlag(threshold) {
-  const [flag, setFlag] = useState(false);
-  useEffect(() => {
-    function onScroll() {
-      setFlag(window.scrollY > threshold);
-    }
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [threshold]);
-  return flag;
-}
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
+const reveal = {
+  hidden: { opacity: 0, y: 35 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.7,
+      ease: [0.2, 0.7, 0.2, 1],
+    },
+  },
 };
 
-function Reveal({ as = "div", className, children, delay = 0, ...rest }) {
-  const Comp = motion[as] || motion.div;
+function Reveal({ children, delay = 0, className = "" }) {
   return (
-    <Comp
+    <motion.div
       className={className}
+      variants={reveal}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
-      variants={fadeUp}
-      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay }}
-      {...rest}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ delay }}
     >
       {children}
-    </Comp>
+    </motion.div>
   );
 }
 
-/* Animated count-up number, triggered once when it scrolls into view */
-function CountUp({ value, suffix = "", duration = 1.8 }) {
-  const [display, setDisplay] = useState(0);
-  const started = useRef(false);
-  const reduceMotion = useReducedMotion();
+function useScrollFlag() {
+  const [scrolled, setScrolled] = useState(false);
 
-  const start = useCallback(() => {
-    if (started.current) return;
-    started.current = true;
+  useEffect(() => {
+    const handle = () => setScrolled(window.scrollY > 40);
+    handle();
+    window.addEventListener("scroll", handle, { passive: true });
+    return () => window.removeEventListener("scroll", handle);
+  }, []);
 
-    if (reduceMotion) {
-      setDisplay(value);
-      return;
-    }
+  return scrolled;
+}
 
-    const startTime = performance.now();
-    function tick(now) {
-      const progress = Math.min((now - startTime) / (duration * 1000), 1);
+function scrollToId(id) {
+  document.getElementById(id)?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
+/* ============================================================
+   COUNT UP
+============================================================ */
+
+function CountUp({ value, suffix = "" }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let start;
+    let frame;
+
+    const duration = 1500;
+
+    const animate = (time) => {
+      if (!start) start = time;
+      const progress = Math.min((time - start) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.round(eased * value));
-      if (progress < 1) requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  }, [value, duration, reduceMotion]);
+
+      setCount(Math.round(value * eased));
+
+      if (progress < 1) {
+        frame = requestAnimationFrame(animate);
+      }
+    };
+
+    frame = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(frame);
+  }, [value]);
 
   return (
-    <motion.span onViewportEnter={start} viewport={{ once: true, amount: 0.6 }}>
-      {display}
+    <>
+      {count}
       {suffix}
-    </motion.span>
+    </>
   );
-}
-
-/* ============================================================
-   GLOBAL STYLES
-   ============================================================ */
-
-function GlobalStyles() {
-  return (
-    <style>{`
-      @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap");
-
-      :root{
-        --navy:#07111f;
-        --navy-2:#0d1c30;
-        --gold:#c6a15b;
-        --gold-light:#e3c78f;
-        --gold-dark:#8a6b34;
-        --ivory:#f6f2e9;
-        --white:#ffffff;
-        --text:#1a2230;
-        --text-light:#6b7484;
-        --text-muted:#98a0ac;
-        --border:rgba(7,17,31,0.12);
-        --container:1240px;
-        --font-display:'Playfair Display', serif;
-        --font-body:'Manrope', sans-serif;
-      }
-
-      *{margin:0;padding:0;box-sizing:border-box;}
-      html{scroll-behavior:smooth;}
-      .pp-root{font-family:var(--font-body);color:var(--text);background:var(--white);line-height:1.6;overflow-x:hidden;position:relative;}
-      .pp-root img{display:block;width:100%;max-width:100%;}
-      .pp-root button,.pp-root input,.pp-root select,.pp-root textarea{font:inherit;}
-      .pp-root button{border:0;cursor:pointer;background:none;}
-      .pp-root a{color:inherit;text-decoration:none;}
-      .pp-root ul{list-style:none;}
-      .pp-root ::selection{background:var(--gold);color:var(--white);}
-
-      .container{width:min(100% - 40px, var(--container));margin-inline:auto;}
-      .section{padding:120px 0;}
-      .section--tight{padding:90px 0;}
-      .section--navy{background:var(--navy);color:var(--white);}
-      .section--ivory{background:var(--ivory);}
-
-      .kicker{
-        font-family:var(--font-display);
-        font-style:italic;
-        font-weight:400;
-        font-size:17px;
-        color:var(--gold-dark);
-        margin-bottom:16px;
-      }
-      .section--navy .kicker{color:var(--gold-light);}
-
-      .heading{
-        font-family:var(--font-display);
-        font-weight:500;
-        letter-spacing:-0.02em;
-        line-height:1.08;
-        font-size:clamp(32px,4.4vw,52px);
-        max-width:720px;
-      }
-
-      .lede{
-        max-width:520px;
-        color:var(--text-light);
-        font-size:15.5px;
-        line-height:1.85;
-        margin-top:18px;
-      }
-      .section--navy .lede{color:rgba(255,255,255,0.62);}
-
-      .grain{
-        position:fixed;inset:0;pointer-events:none;z-index:2;opacity:0.035;mix-blend-mode:overlay;
-        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      }
-
-      /* ---------- scroll progress ---------- */
-      .scroll-progress{position:fixed;top:0;left:0;right:0;height:3px;transform-origin:0%;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light));z-index:1200;}
-
-      /* ---------- buttons ---------- */
-      .btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:52px;padding:0 26px;font-size:12.5px;font-weight:700;letter-spacing:0.02em;border:1px solid transparent;transition:all .3s ease;overflow:hidden;white-space:nowrap;}
-      .btn::before{content:'';position:absolute;inset:0;transform:translateX(-104%);transition:transform .45s ease;z-index:0;}
-      .btn:hover::before{transform:translateX(0);}
-      .btn span,.btn svg{position:relative;z-index:1;}
-      .btn--gold{background:var(--gold);color:var(--white);}
-      .btn--gold::before{background:var(--gold-dark);}
-      .btn--outline{border-color:rgba(255,255,255,0.45);color:var(--white);}
-      .btn--outline::before{background:var(--white);}
-      .btn--outline:hover{color:var(--navy);}
-      .btn--outline-dark{border-color:var(--navy);color:var(--navy);}
-      .btn--outline-dark::before{background:var(--navy);}
-      .btn--outline-dark:hover{color:var(--white);}
-      .btn--small{min-height:42px;padding:0 18px;font-size:11px;}
-
-      /* ---------- navbar ---------- */
-      .navbar{position:fixed;top:0;left:0;right:0;height:88px;z-index:1000;color:var(--white);transition:background .35s ease,height .35s ease,box-shadow .35s ease;}
-      .navbar--scrolled{height:74px;background:rgba(7,17,31,0.92);backdrop-filter:blur(16px);box-shadow:0 12px 34px rgba(0,0,0,0.16);}
-      .navbar__inner{height:100%;display:flex;align-items:center;justify-content:space-between;gap:32px;}
-      .navbar__brand{display:flex;align-items:center;gap:12px;}
-      .navbar__brand-mark{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--gold);color:var(--gold);font-family:var(--font-display);font-size:18px;flex:0 0 auto;}
-      .navbar__brand-mark--footer{border-color:var(--gold);color:var(--gold);}
-      .navbar__brand-name{font-family:var(--font-display);font-size:17px;line-height:1.15;}
-      .navbar__brand-name span{display:block;color:var(--gold-light);font-size:10.5px;font-family:var(--font-body);letter-spacing:0.06em;margin-top:2px;}
-      .navbar__links{display:flex;align-items:center;gap:30px;}
-      .navbar__links a{position:relative;font-size:12.5px;font-weight:600;color:rgba(255,255,255,0.85);transition:color .25s ease;}
-      .navbar__links a::after{content:'';position:absolute;left:0;bottom:-7px;width:0;height:1px;background:var(--gold);transition:width .3s ease;}
-      .navbar__links a:hover{color:var(--gold-light);}
-      .navbar__links a:hover::after{width:100%;}
-      .navbar__actions{display:flex;align-items:center;gap:14px;}
-      .navbar__hamburger{width:42px;height:42px;display:none;align-items:center;justify-content:center;color:var(--white);}
-
-      .mobile-menu{position:fixed;inset:0;z-index:1100;background:var(--navy);display:flex;flex-direction:column;padding:26px 24px;}
-      .mobile-menu__top{display:flex;align-items:center;justify-content:space-between;}
-      .mobile-menu__close{width:42px;height:42px;display:grid;place-items:center;color:var(--white);}
-      .mobile-menu__links{display:flex;flex-direction:column;gap:6px;margin-top:60px;}
-      .mobile-menu__links a{font-family:var(--font-display);font-size:30px;color:var(--white);padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.08);}
-      .mobile-menu__cta{margin-top:30px;align-self:flex-start;}
-
-      /* ---------- hero ---------- */
-      .hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;color:var(--white);}
-      .hero__image{position:absolute;inset:-6% ;background-size:cover;background-position:center;will-change:transform;}
-      .hero__overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,10,19,0.92) 5%,rgba(4,10,19,0.6) 55%,rgba(4,10,19,0.25) 100%),linear-gradient(to top,rgba(2,6,12,0.55),transparent 45%);}
-      .hero__glow{position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(198,161,91,0.22),transparent 70%);pointer-events:none;transform:translate(-50%,-50%);transition:opacity .4s ease;}
-      .hero__content{position:relative;z-index:2;max-width:760px;padding-top:70px;}
-      .hero__kicker{font-family:var(--font-display);font-style:italic;color:var(--gold-light);font-size:19px;margin-bottom:22px;}
-      .hero__heading{font-family:var(--font-display);font-weight:500;letter-spacing:-0.03em;line-height:0.98;font-size:clamp(46px,7vw,88px);margin-bottom:26px;}
-      .hero__sub{max-width:560px;color:rgba(255,255,255,0.76);font-size:16.5px;line-height:1.85;margin-bottom:34px;}
-      .hero__buttons{display:flex;flex-wrap:wrap;gap:14px;}
-      .hero__trust{display:flex;flex-wrap:wrap;gap:26px;margin-top:48px;color:rgba(255,255,255,0.62);font-size:12px;font-weight:600;}
-      .hero__scroll{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(255,255,255,0.6);font-size:10.5px;letter-spacing:0.14em;}
-      .hero__scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,rgba(255,255,255,0.7),transparent);}
-
-      /* ---------- search ---------- */
-      .hero-search{position:relative;z-index:3;margin-top:56px;}
-      .hero-search__panel{display:grid;grid-template-columns:repeat(3,1fr) auto;background:var(--white);box-shadow:0 30px 70px rgba(0,0,0,0.3);}
-      .hero-search__field{padding:16px 22px;border-right:1px solid var(--border);}
-      .hero-search__field label{display:block;font-size:9.5px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;}
-      .hero-search__field select{width:100%;border:0;outline:0;background:transparent;color:var(--navy);font-size:13.5px;font-weight:700;cursor:pointer;}
-      .hero-search__submit{border-radius:0;min-width:170px;}
-
-      /* ---------- marquee ---------- */
-      .marquee{position:relative;overflow:hidden;background:var(--navy);padding:22px 0;border-top:1px solid rgba(198,161,91,0.25);border-bottom:1px solid rgba(198,161,91,0.25);}
-      .marquee__track{display:flex;width:max-content;animation:marquee 32s linear infinite;}
-      .marquee:hover .marquee__track{animation-play-state:paused;}
-      .marquee__item{display:flex;align-items:center;gap:22px;padding-right:22px;font-family:var(--font-display);font-style:italic;font-size:22px;color:rgba(255,255,255,0.8);white-space:nowrap;}
-      .marquee__item svg{color:var(--gold);flex:0 0 auto;}
-      @keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
-
-      /* ---------- stats ---------- */
-      .stats{background:var(--ivory);padding:70px 0;}
-      .stats__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);}
-      .stats__card{background:var(--ivory);padding:36px 30px;}
-      .stats__value{display:block;font-family:var(--font-display);font-size:clamp(38px,4vw,54px);font-weight:500;color:var(--navy);}
-      .stats__label{margin-top:10px;color:var(--text-light);font-size:13px;line-height:1.6;max-width:220px;}
-      .stats__note{margin-top:26px;color:var(--text-muted);font-size:11.5px;}
-
-      /* ---------- trust ---------- */
-      .trust__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-top:56px;}
-      .trust__card{background:var(--white);padding:38px 28px;transition:transform .3s ease,box-shadow .3s ease;}
-      .trust__card:hover{transform:translateY(-6px);box-shadow:0 22px 50px rgba(7,17,31,0.1);z-index:1;}
-      .trust__icon{color:var(--gold);margin-bottom:22px;}
-      .trust__card h3{font-family:var(--font-display);font-size:20px;font-weight:600;margin-bottom:8px;}
-      .trust__card p{color:var(--text-light);font-size:12.5px;}
-
-      /* ---------- section intro ---------- */
-      .section__intro{display:flex;align-items:flex-end;justify-content:space-between;gap:40px;flex-wrap:wrap;margin-bottom:54px;}
-      .section__note{margin-top:14px;color:var(--text-muted);font-size:11.5px;max-width:340px;}
-
-      /* ---------- property grid / card ---------- */
-      .property-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;}
-      .property-card{background:var(--white);border:1px solid var(--border);overflow:hidden;transition:box-shadow .4s ease,transform .4s ease;}
-      .property-card:hover{box-shadow:0 26px 60px rgba(7,17,31,0.14);transform:translateY(-6px);}
-      .property-card__media{position:relative;height:250px;overflow:hidden;}
-      .property-card__media img{width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.22,1,.36,1);}
-      .property-card:hover .property-card__media img{transform:scale(1.09);}
-      .property-card__badge{position:absolute;top:16px;left:16px;padding:7px 12px;background:rgba(7,17,31,0.75);backdrop-filter:blur(6px);color:var(--white);font-size:10px;font-weight:700;letter-spacing:0.04em;}
-      .property-card__body{padding:24px;}
-      .property-card__top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;}
-      .property-card__top h3{font-family:var(--font-display);font-size:21px;font-weight:600;}
-      .property-card__price{color:var(--gold-dark);font-weight:700;font-size:13.5px;white-space:nowrap;}
-      .property-card__location{display:flex;align-items:center;gap:6px;color:var(--text-light);font-size:12.5px;margin-bottom:16px;}
-      .property-card__meta{display:flex;gap:16px;padding-top:16px;border-top:1px solid var(--border);color:var(--text-light);font-size:12px;font-weight:600;}
-      .property-card__meta span{display:flex;align-items:center;gap:6px;}
-      .property-card__meta svg{color:var(--gold);}
-      .property-card__actions{display:flex;align-items:center;justify-content:space-between;margin-top:20px;}
-      .property-card__view{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--navy);}
-      .property-card__arrow{transition:transform .3s ease;}
-      .property-card__view:hover .property-card__arrow{transform:translate(3px,-3px);}
-      .property-card__whatsapp{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--border);color:var(--navy);transition:all .25s ease;}
-      .property-card__whatsapp:hover{background:#25d366;border-color:#25d366;color:var(--white);}
-      .property-grid__empty{grid-column:1/-1;padding:70px 30px;text-align:center;background:var(--ivory);color:var(--text-light);}
-      .property-grid__count{margin-top:26px;color:var(--text-muted);font-size:12px;}
-
-      /* ---------- modal ---------- */
-      .modal-backdrop{position:fixed;inset:0;z-index:2000;background:rgba(3,8,14,0.82);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;}
-      .modal{position:relative;width:min(940px,100%);max-height:90vh;overflow:auto;display:grid;grid-template-columns:1fr 1fr;background:var(--white);box-shadow:0 40px 100px rgba(0,0,0,0.4);}
-      .modal__close{position:absolute;top:16px;right:16px;z-index:3;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;background:var(--white);color:var(--navy);box-shadow:0 8px 20px rgba(0,0,0,0.15);}
-      .modal__media{min-height:400px;}
-      .modal__media img{width:100%;height:100%;object-fit:cover;min-height:400px;}
-      .modal__body{padding:44px;}
-      .modal__badge{display:inline-block;padding:6px 12px;background:var(--ivory);color:var(--gold-dark);font-size:10px;font-weight:800;letter-spacing:0.06em;margin-bottom:18px;}
-      .modal__body h3{font-family:var(--font-display);font-size:32px;font-weight:600;margin-bottom:10px;}
-      .modal__location{display:flex;align-items:center;gap:6px;color:var(--text-light);font-size:12.5px;margin-bottom:16px;}
-      .modal__price{font-family:var(--font-display);font-size:24px;color:var(--gold-dark);margin-bottom:18px;}
-      .modal__description{color:var(--text-light);font-size:14px;line-height:1.85;margin-bottom:24px;}
-      .modal__meta{display:flex;gap:22px;padding:18px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:24px;font-size:12.5px;font-weight:600;color:var(--text);}
-      .modal__meta span{display:flex;align-items:center;gap:7px;}
-      .modal__meta svg{color:var(--gold);}
-      .modal__features h4{font-family:var(--font-display);font-size:16px;margin-bottom:12px;}
-      .modal__features ul{display:grid;gap:9px;margin-bottom:28px;}
-      .modal__features li{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--text-light);}
-      .modal__features svg{color:var(--gold);flex:0 0 auto;margin-top:2px;}
-      .modal__actions{display:flex;gap:12px;flex-wrap:wrap;}
-
-      /* ---------- services ---------- */
-      .services__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,0.12);margin-top:54px;}
-      .services__card{background:var(--navy);padding:38px 28px;min-height:250px;transition:background .3s ease;}
-      .services__card:hover{background:var(--navy-2);}
-      .services__icon{color:var(--gold);margin-bottom:26px;}
-      .services__card h3{font-family:var(--font-display);font-size:21px;font-weight:600;margin-bottom:10px;}
-      .services__card p{color:rgba(255,255,255,0.6);font-size:12.5px;line-height:1.75;}
-
-      /* ---------- why ---------- */
-      .why__inner{display:grid;grid-template-columns:0.85fr 1.15fr;gap:80px;align-items:center;}
-      .why__image{position:relative;}
-      .why__image img{height:560px;object-fit:cover;}
-      .why__image::before{content:'';position:absolute;top:-18px;left:-18px;width:110px;height:110px;border-top:1px solid var(--gold);border-left:1px solid var(--gold);}
-      .why__list{display:grid;gap:16px;margin-top:34px;}
-      .why__list li{display:flex;align-items:flex-start;gap:14px;font-size:14.5px;color:var(--text);}
-      .why__check{width:24px;height:24px;flex:0 0 auto;display:grid;place-items:center;border:1px solid rgba(198,161,91,0.5);color:var(--gold-dark);margin-top:1px;}
-
-      /* ---------- areas ---------- */
-      .areas__grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;grid-template-rows:260px 260px;gap:16px;margin-top:54px;}
-      .areas__card{position:relative;overflow:hidden;color:var(--white);cursor:default;}
-      .areas__card:first-child{grid-row:span 2;}
-      .areas__card img{width:100%;height:100%;object-fit:cover;transition:transform .7s ease;}
-      .areas__card:hover img{transform:scale(1.08);}
-      .areas__overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(3,9,17,0.88),rgba(3,9,17,0.05) 60%);}
-      .areas__text{position:absolute;left:26px;right:26px;bottom:24px;}
-      .areas__text h3{font-family:var(--font-display);font-size:26px;font-weight:500;margin-bottom:6px;}
-      .areas__text p{font-size:12.5px;color:rgba(255,255,255,0.72);max-width:260px;}
-      .areas__arrow{position:absolute;top:20px;right:20px;color:var(--gold-light);opacity:0;transform:translate(-6px,6px);transition:all .3s ease;}
-      .areas__card:hover .areas__arrow{opacity:1;transform:translate(0,0);}
-
-      /* ---------- testimonials ---------- */
-      .testimonials{position:relative;overflow:hidden;}
-      .testimonials__quote-mark{color:rgba(198,161,91,0.35);margin-bottom:18px;}
-      .testimonials__stage{position:relative;min-height:220px;max-width:760px;}
-      .testimonials__quote{font-family:var(--font-display);font-size:clamp(22px,2.6vw,30px);font-weight:400;line-height:1.5;color:var(--white);}
-      .testimonials__meta{margin-top:26px;display:flex;align-items:center;gap:14px;}
-      .testimonials__avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));display:grid;place-items:center;font-family:var(--font-display);color:var(--white);font-size:16px;}
-      .testimonials__name{font-weight:700;font-size:13.5px;}
-      .testimonials__context{color:rgba(255,255,255,0.55);font-size:12px;}
-      .testimonials__controls{display:flex;align-items:center;gap:16px;margin-top:44px;}
-      .testimonials__dots{display:flex;gap:8px;}
-      .testimonials__dot{width:24px;height:2px;background:rgba(255,255,255,0.25);transition:background .3s ease;}
-      .testimonials__dot--active{background:var(--gold);}
-      .testimonials__arrow{width:44px;height:44px;display:grid;place-items:center;border:1px solid rgba(255,255,255,0.2);color:var(--white);transition:all .25s ease;}
-      .testimonials__arrow:hover{border-color:var(--gold);color:var(--gold);}
-      .testimonials__note{margin-top:34px;color:rgba(255,255,255,0.4);font-size:11px;}
-
-      /* ---------- cinematic ---------- */
-      .cinematic{position:relative;min-height:560px;display:flex;align-items:center;color:var(--white);background-size:cover;background-position:center;background-attachment:fixed;}
-      .cinematic__overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,12,21,0.9),rgba(5,12,21,0.4));}
-      .cinematic__content{position:relative;z-index:1;max-width:680px;}
-      .cinematic__content h2{font-family:var(--font-display);font-size:clamp(38px,5.4vw,64px);font-weight:500;line-height:1.06;margin-bottom:22px;}
-      .cinematic__content p{max-width:560px;color:rgba(255,255,255,0.72);font-size:15.5px;line-height:1.85;margin-bottom:30px;}
-
-      /* ---------- process ---------- */
-      .process__row{display:grid;grid-template-columns:repeat(4,1fr);gap:36px;position:relative;margin-top:56px;}
-      .process__row::before{content:'';position:absolute;top:26px;left:8%;right:8%;height:1px;background:rgba(198,161,91,0.35);}
-      .process__step{position:relative;}
-      .process__number{position:relative;z-index:1;display:inline-flex;width:52px;height:52px;align-items:center;justify-content:center;border:1px solid var(--gold);color:var(--gold-dark);font-family:var(--font-display);font-size:17px;background:var(--white);margin-bottom:22px;}
-      .process__step h3{font-family:var(--font-display);font-size:19px;font-weight:600;margin-bottom:8px;}
-      .process__step p{color:var(--text-light);font-size:13px;line-height:1.75;}
-
-      /* ---------- investment cta ---------- */
-      .investment-cta__inner{position:relative;padding:74px 70px;background:linear-gradient(120deg,rgba(198,161,91,0.14),transparent 60%);border:1px solid rgba(198,161,91,0.28);text-align:left;}
-      .investment-cta__inner h2{font-family:var(--font-display);font-size:clamp(30px,4vw,46px);font-weight:500;line-height:1.1;max-width:640px;margin-bottom:16px;}
-      .investment-cta__inner p{max-width:520px;color:rgba(255,255,255,0.62);font-size:14.5px;margin-bottom:30px;}
-      .investment-cta__buttons{display:flex;gap:14px;flex-wrap:wrap;}
-
-      /* ---------- about ---------- */
-      .about__inner{display:grid;grid-template-columns:0.9fr 1.1fr;gap:70px;align-items:center;}
-      .about__image{position:relative;}
-      .about__image img{height:480px;object-fit:cover;}
-      .about__copy p{color:var(--text-light);font-size:14.5px;line-height:1.9;margin-bottom:20px;}
-
-      /* ---------- contact ---------- */
-      .contact__grid{display:grid;grid-template-columns:0.8fr 1.2fr;gap:70px;align-items:start;margin-top:54px;}
-      .contact__item{display:flex;align-items:flex-start;gap:16px;margin-bottom:26px;}
-      .contact__item svg{color:var(--gold);flex:0 0 auto;margin-top:2px;}
-      .contact__item a,.contact__item p{font-size:14px;color:var(--text);}
-      .contact__form{background:var(--white);padding:44px;box-shadow:0 20px 60px rgba(7,17,31,0.08);}
-      .contact__row{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
-      .contact__field{display:flex;flex-direction:column;gap:7px;margin-bottom:20px;}
-      .contact__field label{font-size:10.5px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
-      .contact__field input,.contact__field select,.contact__field textarea{border:0;border-bottom:1px solid var(--border);padding:11px 0;font-size:14px;background:transparent;outline:0;transition:border-color .25s ease;}
-      .contact__field input:focus,.contact__field select:focus,.contact__field textarea:focus{border-color:var(--gold);}
-      .contact__field textarea{resize:vertical;min-height:100px;}
-      .contact__submit{width:100%;margin-top:6px;}
-
-      .toast{position:fixed;left:50%;bottom:30px;z-index:3000;display:flex;align-items:center;gap:12px;padding:16px 22px;background:var(--navy);color:var(--white);border-left:3px solid var(--gold);box-shadow:0 20px 50px rgba(0,0,0,0.3);max-width:min(420px,90vw);}
-      .toast svg{color:var(--gold);flex:0 0 auto;}
-
-      /* ---------- footer ---------- */
-      .footer{padding:70px 0 26px;background:#040a13;color:var(--white);}
-      .footer__top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:50px;padding-bottom:50px;border-bottom:1px solid rgba(255,255,255,0.08);}
-      .footer__brand h3{font-family:var(--font-display);font-size:16px;margin-top:16px;max-width:220px;}
-      .footer__brand p{margin-top:12px;color:rgba(255,255,255,0.45);font-size:12.5px;}
-      .footer__col h4{color:var(--gold-light);font-size:11px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:18px;}
-      .footer__col ul{display:grid;gap:11px;}
-      .footer__col a,.footer__col li{color:rgba(255,255,255,0.55);font-size:12.5px;}
-      .footer__col a:hover{color:var(--gold);}
-      .footer__bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding-top:22px;color:rgba(255,255,255,0.35);font-size:11px;}
-      .footer__social{display:flex;gap:10px;}
-      .footer__social a{width:36px;height:36px;display:grid;place-items:center;border:1px solid rgba(255,255,255,0.14);transition:all .25s ease;}
-      .footer__social a:hover{border-color:var(--gold);color:var(--gold);}
-
-      /* ---------- floating buttons ---------- */
-      .whatsapp-float{position:fixed;right:26px;bottom:26px;z-index:900;width:58px;height:58px;display:grid;place-items:center;border-radius:50%;background:#25d366;color:var(--white);box-shadow:0 16px 40px rgba(37,211,102,0.35);}
-      .whatsapp-float__pulse{position:absolute;inset:0;border-radius:50%;background:#25d366;animation:pulse 2.2s ease-out infinite;}
-      @keyframes pulse{0%{transform:scale(1);opacity:.6;}100%{transform:scale(1.9);opacity:0;}}
-      .whatsapp-float__tooltip{position:absolute;right:70px;background:var(--navy);color:var(--white);padding:8px 14px;font-size:12px;white-space:nowrap;opacity:0;transform:translateX(6px);transition:all .25s ease;pointer-events:none;}
-      .whatsapp-float:hover .whatsapp-float__tooltip{opacity:1;transform:translateX(0);}
-      .back-to-top{position:fixed;right:26px;bottom:96px;z-index:900;width:44px;height:44px;display:grid;place-items:center;background:var(--navy);color:var(--white);border:1px solid rgba(255,255,255,0.1);}
-      .back-to-top:hover{background:var(--gold);}
-
-      /* ---------- responsive ---------- */
-      @media (max-width:1100px){
-        .property-grid{grid-template-columns:repeat(2,1fr);}
-        .services__grid{grid-template-columns:repeat(2,1fr);}
-        .stats__grid{grid-template-columns:repeat(2,1fr);}
-        .why__inner,.about__inner,.contact__grid{gap:46px;}
-      }
-      @media (max-width:900px){
-        .navbar__links,.navbar__actions .btn{display:none;}
-        .navbar__hamburger{display:flex;}
-        .hero-search__panel{grid-template-columns:repeat(2,1fr);}
-        .hero-search__submit{grid-column:1/-1;}
-        .trust__grid{grid-template-columns:repeat(2,1fr);}
-        .why__inner{grid-template-columns:1fr;}
-        .why__image img{height:400px;}
-        .areas__grid{grid-template-columns:1fr 1fr;grid-template-rows:220px 220px 220px;}
-        .areas__card:first-child{grid-row:auto;grid-column:1/-1;}
-        .process__row{grid-template-columns:1fr 1fr;row-gap:44px;}
-        .process__row::before{display:none;}
-        .investment-cta__inner{padding:50px 34px;}
-        .about__inner{grid-template-columns:1fr;}
-        .contact__grid{grid-template-columns:1fr;}
-        .footer__top{grid-template-columns:1fr 1fr;}
-      }
-      @media (max-width:600px){
-        .section{padding:76px 0;}
-        .property-grid{grid-template-columns:1fr;}
-        .services__grid{grid-template-columns:1fr;}
-        .stats__grid{grid-template-columns:1fr;}
-        .hero-search__panel{grid-template-columns:1fr;}
-        .hero-search__field{border-right:0;border-bottom:1px solid var(--border);}
-        .modal{grid-template-columns:1fr;}
-        .modal__media img{min-height:220px;}
-        .modal__meta{flex-wrap:wrap;gap:14px;}
-        .section__intro{display:block;}
-        .contact__row{grid-template-columns:1fr;}
-        .contact__form{padding:28px 22px;}
-        .footer__top{grid-template-columns:1fr;}
-        .marquee__item{font-size:18px;}
-      }
-
-      /* ============================================================
-         CLIENT-READY POLISH + SECTION SEPARATION
-         ============================================================ */
-      .pp-root{background:#fff;isolation:isolate;}
-      main{position:relative;z-index:1;}
-      .section{position:relative;scroll-margin-top:88px;}
-      .section:not(.section--navy)::after{content:"";position:absolute;left:50%;bottom:0;width:min(100% - 80px,1180px);height:1px;background:linear-gradient(90deg,transparent,rgba(198,161,91,.35),transparent);transform:translateX(-50%);}
-      .section--ivory{background:linear-gradient(180deg,#f8f5ee 0%,#f3eee3 100%);}
-      .section--navy{background:linear-gradient(145deg,#06101d 0%,#0b1a2d 55%,#07111f 100%);}
-      .section--navy::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 85% 15%,rgba(198,161,91,.11),transparent 28%),radial-gradient(circle at 10% 90%,rgba(198,161,91,.06),transparent 24%);}
-      .section--navy>.container{position:relative;z-index:1;}
-
-      .hero{min-height:clamp(720px,100svh,980px);}
-      .hero__overlay{background:linear-gradient(90deg,rgba(3,8,16,.96) 0%,rgba(4,10,19,.72) 45%,rgba(4,10,19,.30) 100%),linear-gradient(0deg,rgba(2,6,12,.72),transparent 55%);}
-      .hero__content{padding-top:96px;}
-      .hero__heading{max-width:780px;text-shadow:0 8px 30px rgba(0,0,0,.22);}
-      .hero__sub{max-width:610px;}
-      .hero-search{margin-top:62px;}
-      .hero-search__panel{border:1px solid rgba(255,255,255,.16);border-radius:3px;overflow:hidden;box-shadow:0 34px 90px rgba(0,0,0,.36);}
-      .hero-search__field{min-width:0;background:rgba(255,255,255,.98);}
-      .hero-search__submit{min-width:190px;}
-
-      .stats{position:relative;border-bottom:1px solid rgba(7,17,31,.08);}
-      .stats__grid,.trust__grid{border-radius:4px;overflow:hidden;box-shadow:0 14px 45px rgba(7,17,31,.06);}
-      .stats__card{transition:transform .3s ease,background .3s ease;}
-      .stats__card:hover{transform:translateY(-3px);background:#fffdf8;}
-      .trust__card{min-height:210px;}
-
-      .section__intro{align-items:flex-end;}
-      .property-grid{gap:30px;}
-      .property-card{border-radius:6px;box-shadow:0 8px 25px rgba(7,17,31,.045);}
-      .property-card__media{height:285px;}
-      .property-card__media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 58%,rgba(3,8,14,.28));pointer-events:none;}
-      .property-card__badge{z-index:1;border:1px solid rgba(255,255,255,.16);border-radius:999px;}
-      .property-card__whatsapp{border-radius:50%;}
-      .property-card__view{padding:8px 0;}
-
-      .services__card,.areas__card,.process__step,.contact__form,.investment-cta__inner{border-radius:5px;}
-      .services__card{min-height:245px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));transition:transform .35s ease,border-color .35s ease,background .35s ease;}
-      .services__card:hover{transform:translateY(-7px);border-color:rgba(198,161,91,.45);background:linear-gradient(145deg,rgba(198,161,91,.10),rgba(255,255,255,.025));}
-      .areas__card{box-shadow:0 15px 40px rgba(7,17,31,.08);}
-      .areas__card img{transition:transform .8s cubic-bezier(.22,1,.36,1),filter .8s ease;}
-      .areas__card:hover img{transform:scale(1.06);filter:saturate(1.05);}
-
-      .testimonials{overflow:hidden;}
-      .testimonials__stage{max-width:850px;}
-      .testimonials__quote{font-size:clamp(24px,3.2vw,42px);line-height:1.35;}
-      .testimonials__avatar{box-shadow:0 0 0 5px rgba(198,161,91,.10);}
-
-      .cinematic{min-height:650px;display:flex;align-items:center;position:relative;background-attachment:fixed;}
-      .cinematic__content{position:relative;z-index:1;}
-      .cinematic::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 70% 45%,rgba(198,161,91,.13),transparent 30%);pointer-events:none;}
-
-      .investment-cta__inner{position:relative;overflow:hidden;border:1px solid rgba(198,161,91,.24);box-shadow:0 25px 70px rgba(0,0,0,.16);}
-      .investment-cta__inner::after{content:"";position:absolute;width:360px;height:360px;right:-170px;top:-190px;border:1px solid rgba(198,161,91,.18);border-radius:50%;box-shadow:0 0 0 55px rgba(198,161,91,.035),0 0 0 110px rgba(198,161,91,.02);}
-      .contact__form{box-shadow:0 20px 55px rgba(7,17,31,.07);border:1px solid rgba(7,17,31,.08);}
-      .contact__field input:focus,.contact__field select:focus,.contact__field textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(198,161,91,.12);}
-      .footer{position:relative;}
-      .whatsapp-float{box-shadow:0 14px 35px rgba(0,0,0,.25);}
-      .back-to-top{box-shadow:0 12px 30px rgba(7,17,31,.18);}
-
-      @media (max-width:900px){
-        .hero__content{padding-top:115px;}
-        .hero-search{margin-top:42px;}
-        .hero-search__panel{grid-template-columns:1fr 1fr;}
-        .hero-search__submit{grid-column:1/-1;}
-        .property-grid{grid-template-columns:1fr 1fr;}
-        .property-card__media{height:245px;}
-      }
-
-      @media (prefers-reduced-motion: reduce){
-        html{scroll-behavior:auto;}
-        *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important;}
-      }
-    `}</style>
-  );
-}
-
-/* ============================================================
-   SCROLL PROGRESS BAR
-   ============================================================ */
-
-function ScrollProgressBar() {
-  const { scrollYProgress } = useScroll();
-  return <motion.div className="scroll-progress" style={{ scaleX: scrollYProgress }} />;
 }
 
 /* ============================================================
    NAVBAR
-   ============================================================ */
+============================================================ */
 
-function Navbar({ onOpenMenu, menuOpen, onCloseMenu }) {
-  const scrolled = useScrollFlag(60);
+function Navbar() {
+  const scrolled = useScrollFlag();
+  const [open, setOpen] = useState(false);
+
+  const links = [
+    ["Home", "home"],
+    ["Properties", "properties"],
+    ["Services", "services"],
+    ["Areas", "areas"],
+    ["About", "about"],
+    ["Contact", "contact"],
+  ];
+
+  const go = (id) => {
+    setOpen(false);
+    setTimeout(() => scrollToId(id), 100);
+  };
 
   return (
     <>
-      <header className={`navbar ${scrolled ? "navbar--scrolled" : ""}`}>
-        <div className="navbar__inner container">
-          <a
-            href="#home"
-            className="navbar__brand"
-            onClick={(e) => { e.preventDefault(); scrollToId("home"); }}
-          >
-            <span className="navbar__brand-mark">PP</span>
-            <span className="navbar__brand-name">
-              Prime Property
-              <span>&amp; Developers</span>
-            </span>
-          </a>
-
-          <nav className="navbar__links" aria-label="Primary">
-            {NAV_LINKS.map((link) => (
-              <a key={link.id} href={`#${link.id}`} onClick={(e) => { e.preventDefault(); scrollToId(link.id); }}>
-                {link.label}
-              </a>
-            ))}
-          </nav>
-
-          <div className="navbar__actions">
-            <a href="#contact" className="btn btn--gold btn--small" onClick={(e) => { e.preventDefault(); scrollToId("contact"); }}>
-              Book Consultation
-            </a>
-            <button type="button" className="navbar__hamburger" aria-label="Open menu" aria-expanded={menuOpen} onClick={onOpenMenu}>
-              <Menu size={24} aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div className="mobile-menu" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
-            <div className="mobile-menu__top">
-              <span className="navbar__brand-mark">PP</span>
-              <button type="button" className="mobile-menu__close" aria-label="Close menu" onClick={onCloseMenu}>
-                <X size={26} aria-hidden="true" />
-              </button>
+      <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
+        <div className="nav-inner">
+          <button className="brand" onClick={() => go("home")}>
+            <div className="brand-mark">
+              <span>PP</span>
             </div>
 
-            <motion.nav
-              className="mobile-menu__links"
-              aria-label="Mobile"
+            <div className="brand-text">
+              <strong>Prime Property</strong>
+              <small>& Developers</small>
+            </div>
+          </button>
+
+          <div className="nav-links">
+            {links.map(([label, id]) => (
+              <button
+                key={id}
+                className="nav-link"
+                onClick={() => scrollToId(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <a className="nav-contact" href={`tel:+${COMPANY.phoneIntl}`}>
+            <Phone size={14} />
+            {COMPANY.phone}
+          </a>
+
+          <button
+            className="menu-btn"
+            aria-label="Open menu"
+            onClick={() => setOpen(true)}
+          >
+            <Menu size={21} />
+          </button>
+        </div>
+      </nav>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="mobile-menu"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <button
+              className="menu-btn"
+              style={{ position: "absolute", right: 15, top: 14 }}
+              onClick={() => setOpen(false)}
+            >
+              <X size={21} />
+            </button>
+
+            <motion.div
+              className="mobile-menu-links"
               initial="hidden"
               animate="visible"
-              variants={{ visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
+              variants={{
+                visible: {
+                  transition: {
+                    staggerChildren: 0.07,
+                  },
+                },
+              }}
             >
-              {NAV_LINKS.map((link) => (
-                <motion.a
-                  key={link.id}
-                  href={`#${link.id}`}
-                  variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
-                  onClick={(e) => { e.preventDefault(); onCloseMenu(); setTimeout(() => scrollToId(link.id), 200); }}
+              {links.map(([label, id]) => (
+                <motion.button
+                  key={id}
+                  className="mobile-link"
+                  onClick={() => go(id)}
+                  variants={{
+                    hidden: { opacity: 0, x: -20 },
+                    visible: { opacity: 1, x: 0 },
+                  }}
                 >
-                  {link.label}
-                </motion.a>
+                  {label}
+                  <ArrowUpRight />
+                </motion.button>
               ))}
-              <motion.a
-                href="#contact"
-                className="btn btn--gold mobile-menu__cta"
-                variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
-                onClick={(e) => { e.preventDefault(); onCloseMenu(); setTimeout(() => scrollToId("contact"), 200); }}
+            </motion.div>
+
+            <div className="mobile-contact">
+              <a href={`tel:+${COMPANY.phoneIntl}`}>
+                <Phone size={17} />
+                {COMPANY.phone}
+              </a>
+
+              <a href={`mailto:${COMPANY.email}`}>
+                <Mail size={17} />
+                {COMPANY.email}
+              </a>
+
+              <a
+                href={WA()}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  color: "var(--navy)",
+                  background: "var(--gold)",
+                  padding: "15px 18px",
+                  borderRadius: "999px",
+                  justifyContent: "center",
+                  fontWeight: 800,
+                }}
               >
-                Book Consultation
-              </motion.a>
-            </motion.nav>
+                <MessageCircle size={17} />
+                Chat on WhatsApp
+              </a>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -948,177 +2462,244 @@ function Navbar({ onOpenMenu, menuOpen, onCloseMenu }) {
 }
 
 /* ============================================================
-   HERO  (cinematic scroll-zoom)
-   ============================================================ */
+   HERO
+============================================================ */
 
-function Hero({ filters, setFilters, onSearch }) {
+function Hero() {
   const reduceMotion = useReducedMotion();
-  const heroRef = useRef(null);
-  const [glow, setGlow] = useState({ x: 0, y: 0, opacity: 0 });
+  const { scrollY } = useScroll();
 
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-
-  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 1.25]);
-  const contentY = useTransform(scrollYProgress, [0, 1], [0, 140]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-  const headingScale = useTransform(scrollYProgress, [0, 1], [1, 0.86]);
-
-  function handleMouseMove(e) {
-    if (reduceMotion) return;
-    const rect = heroRef.current.getBoundingClientRect();
-    setGlow({ x: e.clientX - rect.left, y: e.clientY - rect.top, opacity: 1 });
-  }
+  const imageY = useTransform(scrollY, [0, 800], [0, reduceMotion ? 0 : 100]);
+  const imageScale = useTransform(
+    scrollY,
+    [0, 800],
+    [1, reduceMotion ? 1 : 1.08]
+  );
 
   return (
-    <section
-      id="home"
-      className="hero"
-      ref={heroRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => setGlow((g) => ({ ...g, opacity: 0 }))}
-    >
+    <section id="home" className="hero">
       <motion.div
-        className="hero__image"
-        style={reduceMotion ? undefined : { scale: imageScale }}
-        initial={reduceMotion ? false : { scale: 1.1 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
-        css={undefined}
-      >
-        <motion.div
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=2000&q=80')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-      </motion.div>
+        className="hero-image"
+        style={{ y: imageY, scale: imageScale }}
+      />
 
-      <div className="hero__overlay" aria-hidden="true" />
-      <div
-        className="hero__glow"
-        aria-hidden="true"
-        style={{ left: glow.x, top: glow.y, opacity: glow.opacity * 0.9 }}
+      <div className="hero-grid" />
+
+      <motion.div
+        className="hero-orb one"
+        animate={
+          reduceMotion
+            ? {}
+            : {
+                y: [0, -20, 0],
+                rotate: [0, 12, 0],
+              }
+        }
+        transition={{ duration: 8, repeat: Infinity }}
       />
 
       <motion.div
-        className="hero__content container"
-        style={reduceMotion ? undefined : { y: contentY, opacity: contentOpacity }}
-      >
-        <motion.p
-          className="hero__kicker"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.3 }}
-        >
-          Islamabad&rsquo;s prime addresses, handled personally
-        </motion.p>
+        className="hero-orb two"
+        animate={
+          reduceMotion
+            ? {}
+            : {
+                y: [0, 18, 0],
+                x: [0, -15, 0],
+              }
+        }
+        transition={{ duration: 7, repeat: Infinity }}
+      />
 
-        <motion.h1
-          className="hero__heading"
-          style={reduceMotion ? undefined : { scale: headingScale, transformOrigin: "left center" }}
-          initial={{ opacity: 0, y: 26 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-        >
-          Your Prime Address in Islamabad.
-        </motion.h1>
-
-        <motion.p className="hero__sub" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.9, delay: 0.8 }}>
-          Premium property consultancy, sales, rentals and investment
-          solutions across Islamabad&rsquo;s most sought-after sectors.
-        </motion.p>
-
+      <div className="hero-content">
         <motion.div
-          className="hero__buttons"
-          initial="hidden"
-          animate="visible"
-          variants={{ visible: { transition: { staggerChildren: 0.15, delayChildren: 1.0 } } }}
+          className="hero-copy"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
         >
-          <motion.a
-            href="#properties"
-            className="btn btn--gold"
-            variants={{ hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0 } }}
-            onClick={(e) => { e.preventDefault(); scrollToId("properties"); }}
-          >
-            Explore Properties
-          </motion.a>
-          <motion.a
-            href="#contact"
-            className="btn btn--outline"
-            variants={{ hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0 } }}
-            onClick={(e) => { e.preventDefault(); scrollToId("contact"); }}
-          >
-            Book a Consultation
-          </motion.a>
+          <div className="hero-kicker">
+            <span />
+            Islamabad's Property Specialists
+          </div>
+
+          <h1 className="hero-title">
+            Find a place
+            <br />
+            <em>worth calling</em>
+            <br />
+            home.
+          </h1>
+
+          <p className="hero-description">
+            Premium residential and commercial real estate solutions in
+            Islamabad — built around trust, market knowledge and your long-term
+            goals.
+          </p>
+
+          <div className="hero-actions">
+            <button
+              className="btn btn-gold"
+              onClick={() => scrollToId("properties")}
+            >
+              Explore Properties
+              <ArrowUpRight size={15} />
+            </button>
+
+            <a
+              className="btn btn-outline"
+              href={WA(
+                "Hello Prime Property & Developers, I would like to discuss a property opportunity."
+              )}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <MessageCircle size={15} />
+              WhatsApp Us
+            </a>
+          </div>
+
+          <div className="hero-trust">
+            <span>
+              <ShieldCheck size={13} />
+              Trusted guidance
+            </span>
+
+            <span>
+              <Award size={13} />
+              Premium properties
+            </span>
+
+            <span>
+              <Compass size={13} />
+              Islamabad specialists
+            </span>
+          </div>
         </motion.div>
+      </div>
 
-        <motion.div className="hero__trust" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.9, delay: 1.3 }}>
-          <span>Residential</span>
-          <span>Commercial</span>
-          <span>Investment Advisory</span>
-        </motion.div>
-      </motion.div>
-
-      <motion.div
-        className="hero-search container"
-        initial={{ opacity: 0, y: 60 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 1.1, ease: "easeOut" }}
-      >
-        <form className="hero-search__panel" onSubmit={(e) => { e.preventDefault(); onSearch(); }}>
-          <div className="hero-search__field">
-            <label htmlFor="lookingFor">Looking for</label>
-            <select id="lookingFor" value={filters.purpose} onChange={(e) => setFilters((f) => ({ ...f, purpose: e.target.value }))}>
-              {LOOKING_FOR_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-          <div className="hero-search__field">
-            <label htmlFor="propertyType">Property type</label>
-            <select id="propertyType" value={filters.type} onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value }))}>
-              {PROPERTY_TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-          <div className="hero-search__field">
-            <label htmlFor="location">Location</label>
-            <select id="location" value={filters.location} onChange={(e) => setFilters((f) => ({ ...f, location: e.target.value }))}>
-              {LOCATION_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-          <button type="submit" className="btn btn--gold hero-search__submit">
-            <Search size={17} aria-hidden="true" />
-            Search Property
-          </button>
-        </form>
-      </motion.div>
-
-      <motion.div className="hero__scroll" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6, duration: 0.8 }}>
-        <span>SCROLL</span>
-        <span className="hero__scroll-line" />
-      </motion.div>
+      <div className="scroll-indicator">
+        Scroll
+        <motion.div
+          className="scroll-line"
+          animate={reduceMotion ? {} : { scaleY: [1, .4, 1] }}
+          transition={{ duration: 1.8, repeat: Infinity }}
+        />
+      </div>
     </section>
   );
 }
 
 /* ============================================================
-   MARQUEE TICKER
-   ============================================================ */
+   SEARCH
+============================================================ */
 
-function Marquee() {
-  const items = ["F-6", "F-7", "F-8", "E-7", "Blue Area", "Buy", "Rent", "Invest"];
-  const loop = [...items, ...items];
+function SearchBox({ onSearch }) {
+  const [purpose, setPurpose] = useState("Buy");
+  const [type, setType] = useState("All");
+  const [location, setLocation] = useState("All");
 
   return (
-    <div className="marquee" aria-hidden="true">
-      <div className="marquee__track">
-        {loop.map((item, i) => (
-          <span className="marquee__item" key={`${item}-${i}`}>
+    <div className="search-wrap">
+      <div className="container">
+        <motion.div
+          className="search-panel"
+          initial={{ opacity: 0, y: 25 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: .6 }}
+        >
+          <div className="search-top">
+            <span className="search-title">Find your property</span>
+            <span className="search-label">Curated opportunities</span>
+          </div>
+
+          <div className="search-fields">
+            <div className="field">
+              <Search className="field-icon" size={17} />
+
+              <select
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value)}
+              >
+                <option>Buy</option>
+                <option>Rent</option>
+                <option>Invest</option>
+              </select>
+
+              <ChevronDown className="field-chevron" size={14} />
+            </div>
+
+            <div className="field">
+              <Building2 className="field-icon" size={17} />
+
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+              >
+                <option>All</option>
+                <option>House</option>
+                <option>Apartment</option>
+                <option>Commercial</option>
+              </select>
+
+              <ChevronDown className="field-chevron" size={14} />
+            </div>
+
+            <div className="field">
+              <MapPin className="field-icon" size={17} />
+
+              <select
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              >
+                <option>All</option>
+                <option>F-6</option>
+                <option>F-7</option>
+                <option>F-8</option>
+                <option>E-7</option>
+                <option>Blue Area</option>
+              </select>
+
+              <ChevronDown className="field-chevron" size={14} />
+            </div>
+
+            <button
+              className="search-btn"
+              onClick={() => onSearch({ purpose, type, location })}
+            >
+              <Search size={16} />
+              Search
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   MARQUEE
+============================================================ */
+
+function Marquee() {
+  const items = [
+    "F-6 Islamabad",
+    "F-7 Islamabad",
+    "F-8 Islamabad",
+    "E-7 Islamabad",
+    "Blue Area",
+    "Premium Real Estate",
+  ];
+
+  return (
+    <div className="marquee">
+      <div className="marquee-track">
+        {[...items, ...items].map((item, i) => (
+          <div className="marquee-item" key={i}>
             {item}
-            <MapPin size={16} aria-hidden="true" />
-          </span>
+            <span>✦</span>
+          </div>
         ))}
       </div>
     </div>
@@ -1127,52 +2708,29 @@ function Marquee() {
 
 /* ============================================================
    STATS
-   ============================================================ */
+============================================================ */
 
 function Stats() {
-  return (
-    <section className="stats">
-      <div className="container">
-        <div className="stats__grid">
-          {STATS.map((stat, i) => (
-            <Reveal as="div" className="stats__card" key={stat.label} delay={i * 0.08}>
-              <span className="stats__value">
-                <CountUp value={stat.value} suffix={stat.suffix} />
-              </span>
-              <p className="stats__label">{stat.label}</p>
-            </Reveal>
-          ))}
-        </div>
-        <p className="stats__note">Figures shown are illustrative demo content for this preview site.</p>
-      </div>
-    </section>
-  );
-}
-
-/* ============================================================
-   TRUST SECTION
-   ============================================================ */
-
-function TrustSection() {
-  const items = [
-    { icon: MapPin, title: "Prime Locations", detail: "F-6, F-7, F-8, E-7" },
-    { icon: HomeIcon, title: "Property Expertise", detail: "Residential & commercial" },
-    { icon: Handshake, title: "Complete Solutions", detail: "Sales, purchase, rental" },
-    { icon: TrendingUp, title: "Investment Focus", detail: "Strategic guidance" },
-  ];
+  const icons = [Clock3, Building2, MapPin, Users];
 
   return (
-    <section className="section section--ivory">
+    <section className="section" style={{ paddingBottom: 60 }}>
       <div className="container">
-        <Reveal as="h2" className="heading">Real estate, with a clearer perspective.</Reveal>
-        <div className="trust__grid">
-          {items.map((item, i) => {
-            const Icon = item.icon;
+        <div className="stats">
+          {stats.map((stat, index) => {
+            const Icon = icons[index];
+
             return (
-              <Reveal as="div" className="trust__card" key={item.title} delay={i * 0.08}>
-                <Icon className="trust__icon" size={26} aria-hidden="true" />
-                <h3>{item.title}</h3>
-                <p>{item.detail}</p>
+              <Reveal key={stat.label} delay={index * .08}>
+                <div className="stat">
+                  <Icon className="stat-icon" size={20} />
+
+                  <div className="stat-number">
+                    <CountUp value={stat.value} suffix={stat.suffix} />
+                  </div>
+
+                  <div className="stat-label">{stat.label}</div>
+                </div>
               </Reveal>
             );
           })}
@@ -1183,277 +2741,395 @@ function TrustSection() {
 }
 
 /* ============================================================
-   PROPERTY CARD + GRID
-   ============================================================ */
+   PROPERTY CARD
+============================================================ */
 
-function PropertyCard({ property, onView }) {
-  const propertyType = property.type === "commercial" ? "Commercial" : property.type === "apartment" ? "Apartment" : "Residential";
-
+function PropertyCard({ property, onClick }) {
   return (
     <motion.article
       className="property-card"
-      initial={{ opacity: 0, y: 36 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{ duration: 0.6 }}
+      whileTap={{ scale: .985 }}
+      onClick={() => onClick(property)}
+      layout
     >
-      <div className="property-card__media">
-        <img src={property.image} alt={`${property.title} in ${property.location}`} loading="lazy" />
-        <span className="property-card__badge">{propertyType}</span>
+      <div className="property-image">
+        <img src={property.image} alt={property.title} loading="lazy" />
+
+        <span className="property-tag">{property.tag}</span>
+
+        <span className="property-arrow">
+          <ArrowUpRight size={17} />
+        </span>
       </div>
 
-      <div className="property-card__body">
-        <div className="property-card__top">
-          <h3>{property.title}</h3>
-          <span className="property-card__price">{property.price}</span>
-        </div>
-
-        <p className="property-card__location">
-          <MapPin size={15} aria-hidden="true" />
+      <div className="property-body">
+        <div className="property-location">
+          <MapPin size={11} />
           {property.location}
-        </p>
-
-        <div className="property-card__meta">
-          {property.beds !== null && <span><Bed size={16} aria-hidden="true" />{property.beds} Beds</span>}
-          {property.baths !== null && <span><Bath size={16} aria-hidden="true" />{property.baths} Baths</span>}
-          <span><Maximize size={16} aria-hidden="true" />{property.size}</span>
         </div>
 
-        <div className="property-card__actions">
-          <button type="button" className="property-card__view" onClick={() => onView(property)}>
-            View Property
-            <ArrowUpRight size={16} aria-hidden="true" className="property-card__arrow" />
-          </button>
+        <h3 className="property-title">{property.title}</h3>
 
-          <a
-            href={waLink(`Hello Prime Property & Developers, I am interested in ${property.title} (${property.location}).`)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="property-card__whatsapp"
-            aria-label={`Ask about ${property.title} on WhatsApp`}
-          >
-            <MessageCircle size={17} aria-hidden="true" />
-          </a>
+        <div className="property-price">{property.price}</div>
+
+        <div className="property-meta">
+          {property.beds > 0 && (
+            <span>
+              <BedDouble size={13} />
+              {property.beds} Beds
+            </span>
+          )}
+
+          <span>
+            <Bath size={13} />
+            {property.baths} Baths
+          </span>
+
+          <span>
+            <Maximize size={13} />
+            {property.area}
+          </span>
         </div>
       </div>
     </motion.article>
   );
 }
 
-function FeaturedProperties({ filters, onView, resultsRef }) {
+/* ============================================================
+   PROPERTIES
+============================================================ */
+
+function FeaturedProperties({ onSelect, filters }) {
   const filtered = useMemo(() => {
-    return PROPERTIES.filter((property) => {
-      if (filters.purpose && property.purpose !== filters.purpose) return false;
-      if (filters.type && property.type !== filters.type) return false;
-      if (filters.location && property.locationTag !== filters.location) return false;
-      return true;
+    return properties.filter((property) => {
+      const purposeMatch =
+        filters.purpose === "All" || property.purpose === filters.purpose;
+
+      const typeMatch =
+        filters.type === "All" || property.type === filters.type;
+
+      const locationMatch =
+        filters.location === "All" ||
+        property.location.startsWith(filters.location);
+
+      return purposeMatch && typeMatch && locationMatch;
     });
   }, [filters]);
 
-  const isFiltered = filters.purpose || filters.type || filters.location;
-
   return (
-    <section id="properties" className="section" ref={resultsRef}>
+    <section id="properties" className="section section--cream">
       <div className="container">
-        <div className="section__intro">
-          <div>
-            <Reveal as="p" className="kicker">Featured properties</Reveal>
-            <Reveal as="h2" className="heading" delay={0.05}>
-              Selected opportunities across Islamabad&rsquo;s prime sectors.
-            </Reveal>
-            <p className="section__note">
-              Featured listings can be replaced with the client's live inventory, pricing and availability.
+        <Reveal>
+          <div className="section-heading">
+            <div className="eyebrow">Curated portfolio</div>
+
+            <h2 className="section-title">
+              Properties with
+              <br />
+              <i>possibility.</i>
+            </h2>
+
+            <p className="section-description">
+              Explore a selection of residential and commercial opportunities
+              across Islamabad's most sought-after locations.
             </p>
           </div>
-        </div>
+        </Reveal>
 
-        {filtered.length > 0 ? (
-          <div className="property-grid">
-            {filtered.map((property) => (
-              <PropertyCard key={property.id} property={property} onView={onView} />
-            ))}
-          </div>
-        ) : (
-          <div className="property-grid__empty">
-            <p>No demo properties match that search. Try a different combination.</p>
-          </div>
-        )}
+        <AnimatePresence mode="popLayout">
+          {filtered.length > 0 ? (
+            <motion.div className="property-grid" layout>
+              {filtered.map((property, index) => (
+                <motion.div
+                  key={property.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * .05 }}
+                >
+                  <PropertyCard
+                    property={property}
+                    onClick={onSelect}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              style={{
+                padding: "60px 20px",
+                textAlign: "center",
+                background: "white",
+                borderRadius: 20,
+              }}
+            >
+              <Search
+                size={32}
+                color="var(--gold)"
+                style={{ marginBottom: 15 }}
+              />
 
-        {isFiltered && (
-          <p className="property-grid__count">Showing {filtered.length} of {PROPERTIES.length} demo properties</p>
-        )}
+              <h3
+                style={{
+                  fontFamily: "Playfair Display",
+                  fontSize: 28,
+                  margin: 0,
+                }}
+              >
+                No matching properties
+              </h3>
+
+              <p style={{ color: "var(--muted)", fontSize: 12 }}>
+                Try changing your search filters.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );
 }
 
 /* ============================================================
-   PROPERTY MODAL
-   ============================================================ */
+   MODAL
+============================================================ */
 
 function PropertyModal({ property, onClose }) {
-  useEffect(() => {
-    function onKey(event) { if (event.key === "Escape") onClose(); }
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [onClose]);
-
   if (!property) return null;
 
-  const propertyType = property.type === "commercial" ? "Commercial" : property.type === "apartment" ? "Apartment" : "Residential";
-
   return (
-    <motion.div
-      className="modal-backdrop"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.25 }}
-      onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
-      role="dialog"
-      aria-modal="true"
-      aria-label={property.title}
-    >
+    <AnimatePresence>
       <motion.div
-        className="modal"
-        initial={{ opacity: 0, y: 40, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 24, scale: 0.98 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="modal-backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
       >
-        <button type="button" className="modal__close" aria-label="Close" onClick={onClose}>
-          <X size={22} aria-hidden="true" />
-        </button>
+        <motion.div
+          className="modal"
+          initial={{ opacity: 0, y: 30, scale: .97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 20 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="modal-image">
+            <img src={property.image} alt={property.title} />
 
-        <div className="modal__media">
-          <img src={property.image} alt={`${property.title} in ${property.location}`} />
-        </div>
-
-        <div className="modal__body">
-          <span className="modal__badge">{propertyType}</span>
-          <h3>{property.title}</h3>
-          <p className="modal__location"><MapPin size={16} aria-hidden="true" />{property.location}</p>
-          <p className="modal__price">{property.price}</p>
-          <p className="modal__description">{property.description}</p>
-
-          <div className="modal__meta">
-            {property.beds !== null && <span><Bed size={17} aria-hidden="true" />{property.beds} Beds</span>}
-            {property.baths !== null && <span><Bath size={17} aria-hidden="true" />{property.baths} Baths</span>}
-            <span><Maximize size={17} aria-hidden="true" />{property.size}</span>
-          </div>
-
-          <div className="modal__features">
-            <h4>Features</h4>
-            <ul>
-              {property.features.map((feature) => (
-                <li key={feature}><Check size={15} aria-hidden="true" />{feature}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="modal__actions">
-            <a
-              href="#contact"
-              className="btn btn--gold"
-              onClick={(e) => { e.preventDefault(); onClose(); setTimeout(() => scrollToId("contact"), 250); }}
+            <button
+              className="modal-close"
+              onClick={onClose}
+              aria-label="Close"
             >
-              Contact Us
-            </a>
+              <X size={19} />
+            </button>
+          </div>
+
+          <div className="modal-content">
+            <div className="eyebrow">{property.tag}</div>
+
+            <h2>{property.title}</h2>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                color: "var(--muted)",
+                fontSize: 11,
+              }}
+            >
+              <MapPin size={13} color="var(--gold)" />
+              {property.location}
+            </div>
+
+            <div className="modal-price">{property.price}</div>
+
+            <p className="modal-description">
+              {property.description}
+            </p>
+
+            <div className="modal-meta">
+              {property.beds > 0 && (
+                <div className="modal-meta-item">
+                  <BedDouble size={17} />
+                  <span>{property.beds} Beds</span>
+                </div>
+              )}
+
+              <div className="modal-meta-item">
+                <Bath size={17} />
+                <span>{property.baths} Baths</span>
+              </div>
+
+              <div className="modal-meta-item">
+                <Maximize size={17} />
+                <span>{property.area}</span>
+              </div>
+            </div>
+
             <a
-              href={waLink(`Hello Prime Property & Developers, I am interested in ${property.title} (${property.location}).`)}
+              href={WA(
+                `Hello Prime Property & Developers, I am interested in ${property.title} in ${property.location}. Please share more details.`
+              )}
               target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn--outline-dark"
+              rel="noreferrer"
+              className="btn btn-gold"
+              style={{ width: "100%" }}
             >
-              <MessageCircle size={17} aria-hidden="true" />
-              WhatsApp
+              <MessageCircle size={16} />
+              Enquire on WhatsApp
             </a>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </AnimatePresence>
+  );
+}
+
+/* ============================================================
+   ABOUT
+============================================================ */
+
+function About() {
+  return (
+    <section id="about" className="section">
+      <div className="container">
+        <div className="split">
+          <Reveal>
+            <div className="image-stack">
+              <img
+                className="image-main"
+                src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=85"
+                alt="Luxury property"
+              />
+
+              <img
+                className="image-small"
+                src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=85"
+                alt="Luxury interior"
+              />
+
+              <motion.div
+                className="floating-badge"
+                animate={{ rotate: [0, 3, -3, 0] }}
+                transition={{ duration: 5, repeat: Infinity }}
+              >
+                <div>
+                  <Sparkles size={18} />
+                  <br />
+                  Prime
+                  <br />
+                  Standard
+                </div>
+              </motion.div>
+            </div>
+          </Reveal>
+
+          <Reveal delay={.15}>
+            <div>
+              <div className="eyebrow">Why Prime Property</div>
+
+              <h2 className="section-title">
+                Property is
+                <br />
+                personal.
+              </h2>
+
+              <p className="section-description">
+                We believe finding the right property is about more than
+                square footage and price. It is about finding the right
+                opportunity for your life, your family or your future.
+              </p>
+
+              <div className="check-list">
+                {[
+                  "Local knowledge across Islamabad's prime sectors",
+                  "Personalised property recommendations",
+                  "Professional buying, selling and rental guidance",
+                  "Transparent communication throughout the process",
+                ].map((item) => (
+                  <div className="check-item" key={item}>
+                    <span className="check-item-icon">
+                      <Check size={14} />
+                    </span>
+
+                    {item}
+                  </div>
+                ))}
+              </div>
+
+              <button
+                className="btn btn-gold"
+                onClick={() => scrollToId("contact")}
+              >
+                Talk to our team
+                <ArrowUpRight size={15} />
+              </button>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
   );
 }
 
 /* ============================================================
    SERVICES
-   ============================================================ */
+============================================================ */
 
 function Services() {
   return (
     <section id="services" className="section section--navy">
       <div className="container">
-        <Reveal as="p" className="kicker">What we do</Reveal>
-        <Reveal as="h2" className="heading" delay={0.05}>Real estate solutions built around you.</Reveal>
+        <Reveal>
+          <div className="section-heading">
+            <div className="eyebrow">What we do</div>
 
-        <div className="services__grid">
-          {SERVICES.map((service, index) => {
+            <h2 className="section-title">
+              A smarter way
+              <br />
+              to move forward.
+            </h2>
+
+            <p className="section-description">
+              From your first property search to your next investment, our
+              services are designed around clarity and confidence.
+            </p>
+          </div>
+        </Reveal>
+
+        <div className="services-grid">
+          {services.map((service, index) => {
             const Icon = service.icon;
+
             return (
-              <Reveal as="div" className="services__card" key={service.title} delay={index * 0.08}>
-                <Icon className="services__icon" size={30} aria-hidden="true" />
+              <motion.div
+                className="service"
+                key={service.title}
+                initial={{ opacity: 0, y: 25 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * .08 }}
+              >
+                <div className="service-number">{service.number}</div>
+
+                <motion.div
+                  className="service-icon"
+                  whileHover={{ rotate: 8, scale: 1.1 }}
+                >
+                  <Icon size={28} />
+                </motion.div>
+
                 <h3>{service.title}</h3>
-                <p>{service.description}</p>
-              </Reveal>
+
+                <p>{service.text}</p>
+              </motion.div>
             );
           })}
         </div>
-      </div>
-    </section>
-  );
-}
-
-/* ============================================================
-   WHY PRIME PROPERTY
-   ============================================================ */
-
-function WhyPrime() {
-  return (
-    <section className="section">
-      <div className="container why__inner">
-        <motion.div
-          className="why__image"
-          initial={{ opacity: 0, x: -40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.8 }}
-        >
-          <img
-            src="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?auto=format&fit=crop&w=1200&q=80"
-            alt="Premium residential interior in Islamabad"
-            loading="lazy"
-          />
-        </motion.div>
-
-        <motion.div
-          className="why__content"
-          initial={{ opacity: 0, x: 40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.8, delay: 0.1 }}
-        >
-          <p className="kicker">Why Prime Property</p>
-          <h2 className="heading">More than property. A better investment decision.</h2>
-
-          <ul className="why__list">
-            {WHY_POINTS.map((point, index) => (
-              <motion.li
-                key={point}
-                initial={{ opacity: 0, x: 16 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.6 }}
-                transition={{ duration: 0.5, delay: index * 0.07 }}
-              >
-                <span className="why__check"><Check size={14} aria-hidden="true" /></span>
-                {point}
-              </motion.li>
-            ))}
-          </ul>
-        </motion.div>
       </div>
     </section>
   );
@@ -1461,31 +3137,45 @@ function WhyPrime() {
 
 /* ============================================================
    AREAS
-   ============================================================ */
+============================================================ */
 
 function Areas() {
   return (
-    <section id="areas" className="section section--ivory">
+    <section id="areas" className="section">
       <div className="container">
-        <Reveal as="p" className="kicker">Where we work</Reveal>
-        <Reveal as="h2" className="heading" delay={0.05}>Islamabad&rsquo;s prime addresses.</Reveal>
+        <Reveal>
+          <div className="section-heading center">
+            <div className="eyebrow">Prime locations</div>
 
-        <div className="areas__grid">
-          {AREAS.map((area, index) => (
+            <h2 className="section-title">
+              Know the
+              <br />
+              <i>neighbourhood.</i>
+            </h2>
+
+            <p className="section-description" style={{ marginInline: "auto" }}>
+              Focused expertise in the areas that define Islamabad's premium
+              property market.
+            </p>
+          </div>
+        </Reveal>
+
+        <div className="areas-grid">
+          {areas.map((area, index) => (
             <motion.div
-              className="areas__card"
-              key={area.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.6, delay: index * 0.08 }}
+              className="area"
+              key={area.name}
+              initial={{ opacity: 0, scale: .96 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * .06 }}
+              whileHover={{ y: -5 }}
             >
-              <img src={area.image} alt={`${area.name}, Islamabad`} loading="lazy" />
-              <div className="areas__overlay" aria-hidden="true" />
-              <ArrowUpRight className="areas__arrow" size={20} aria-hidden="true" />
-              <div className="areas__text">
+              <img src={area.image} alt={area.name} loading="lazy" />
+
+              <div className="area-content">
                 <h3>{area.name}</h3>
-                <p>{area.description}</p>
+                <p>{area.subtitle}</p>
               </div>
             </motion.div>
           ))}
@@ -1497,104 +3187,67 @@ function Areas() {
 
 /* ============================================================
    TESTIMONIALS
-   ============================================================ */
+============================================================ */
 
 function Testimonials() {
-  const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState(1);
-  const timerRef = useRef(null);
+  const [active, setActive] = useState(0);
 
-  const goTo = useCallback((next) => {
-    setDirection(next > index || (index === TESTIMONIALS.length - 1 && next === 0) ? 1 : -1);
-    setIndex(next);
-  }, [index]);
+  const next = () => setActive((v) => (v + 1) % testimonials.length);
+  const prev = () =>
+    setActive((v) => (v - 1 + testimonials.length) % testimonials.length);
 
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setDirection(1);
-      setIndex((i) => (i + 1) % TESTIMONIALS.length);
-    }, 6500);
-    return () => clearInterval(timerRef.current);
+    const timer = setInterval(next, 6000);
+    return () => clearInterval(timer);
   }, []);
 
-  const current = TESTIMONIALS[index];
-  const initials = current.name.split(" ").map((w) => w[0]).slice(0, 2).join("");
+  const testimonial = testimonials[active];
 
   return (
-    <section id="testimonials" className="section section--navy testimonials">
+    <section id="clients" className="section section--navy">
       <div className="container">
-        <p className="kicker">In their words</p>
-        <h2 className="heading" style={{ marginBottom: 46 }}>What clients say about working with us.</h2>
+        <div className="testimonial-wrap">
+          <Reveal>
+            <div className="eyebrow" style={{ justifyContent: "center" }}>
+              Client perspective
+            </div>
 
-        <Quote className="testimonials__quote-mark" size={44} aria-hidden="true" />
+            <Quote className="quote-icon" size={35} />
 
-        <div className="testimonials__stage">
-          <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
-              key={index}
-              custom={direction}
-              initial={{ opacity: 0, x: 40 * direction }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 * direction }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <p className="testimonials__quote">&ldquo;{current.quote}&rdquo;</p>
-              <div className="testimonials__meta">
-                <span className="testimonials__avatar">{initials}</span>
-                <div>
-                  <p className="testimonials__name">{current.name}</p>
-                  <p className="testimonials__context">{current.context}</p>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={active}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: .35 }}
+              >
+                <p className="testimonial-quote">
+                  “{testimonial.quote}”
+                </p>
+
+                <div className="stars">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star key={star} size={13} fill="currentColor" />
+                  ))}
                 </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+
+                <p className="testimonial-name">{testimonial.name}</p>
+                <p className="testimonial-role">{testimonial.role}</p>
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="slider-controls">
+              <button className="slider-btn" onClick={prev}>
+                <ArrowLeft size={16} />
+              </button>
+
+              <button className="slider-btn" onClick={next}>
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          </Reveal>
         </div>
-
-        <div className="testimonials__controls">
-          <button type="button" className="testimonials__arrow" aria-label="Previous testimonial" onClick={() => goTo((index - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)}>
-            <ArrowLeft size={17} aria-hidden="true" />
-          </button>
-          <div className="testimonials__dots">
-            {TESTIMONIALS.map((t, i) => (
-              <button
-                key={t.name}
-                type="button"
-                aria-label={`Go to testimonial ${i + 1}`}
-                className={`testimonials__dot ${i === index ? "testimonials__dot--active" : ""}`}
-                onClick={() => goTo(i)}
-              />
-            ))}
-          </div>
-          <button type="button" className="testimonials__arrow" aria-label="Next testimonial" onClick={() => goTo((index + 1) % TESTIMONIALS.length)}>
-            <ArrowRight size={17} aria-hidden="true" />
-          </button>
-        </div>
-
-        <p className="testimonials__note">Client testimonials can be replaced with verified reviews and case studies before launch.</p>
-      </div>
-    </section>
-  );
-}
-
-/* ============================================================
-   CINEMATIC
-   ============================================================ */
-
-function Cinematic() {
-  return (
-    <section
-      className="cinematic"
-      style={{ backgroundImage: "url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=2000&q=80')" }}
-    >
-      <div className="cinematic__overlay" aria-hidden="true" />
-      <div className="container cinematic__content">
-        <Reveal as="h2">Invest where Islamabad grows.</Reveal>
-        <Reveal as="p" delay={0.1}>
-          Discover residential, commercial and investment opportunities in one of Pakistan&rsquo;s most prestigious cities.
-        </Reveal>
-        <Reveal as="a" href="#properties" className="btn btn--gold" delay={0.2} onClick={(e) => { e.preventDefault(); scrollToId("properties"); }}>
-          Explore Opportunities
-        </Reveal>
       </div>
     </section>
   );
@@ -1602,29 +3255,58 @@ function Cinematic() {
 
 /* ============================================================
    PROCESS
-   ============================================================ */
+============================================================ */
 
 function Process() {
-  return (
-    <section className="section section--ivory">
-      <div className="container">
-        <Reveal as="p" className="kicker">How it works</Reveal>
-        <Reveal as="h2" className="heading" delay={0.05}>A simpler way to find the right property.</Reveal>
+  const steps = [
+    {
+      number: "01",
+      title: "Tell us what you need",
+      text: "Share your property goals, preferred location and budget.",
+    },
+    {
+      number: "02",
+      title: "Explore opportunities",
+      text: "We shortlist suitable properties based on your requirements.",
+    },
+    {
+      number: "03",
+      title: "Make an informed decision",
+      text: "Review the details and understand the opportunity clearly.",
+    },
+    {
+      number: "04",
+      title: "Move forward",
+      text: "Our team supports you through the next stage of your property journey.",
+    },
+  ];
 
-        <div className="process__row">
-          {PROCESS_STEPS.map((step, index) => (
-            <motion.div
-              className="process__step"
-              key={step.number}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.6, delay: index * 0.12 }}
-            >
-              <span className="process__number">{step.number}</span>
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
-            </motion.div>
+  return (
+    <section className="section section--cream">
+      <div className="container">
+        <Reveal>
+          <div className="section-heading">
+            <div className="eyebrow">Simple process</div>
+
+            <h2 className="section-title">
+              From search
+              <br />
+              to <i>signature.</i>
+            </h2>
+          </div>
+        </Reveal>
+
+        <div className="process-grid">
+          {steps.map((step, index) => (
+            <Reveal key={step.number} delay={index * .08}>
+              <div className="process-card">
+                <div className="process-number">{step.number}</div>
+
+                <h3>{step.title}</h3>
+
+                <p>{step.text}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -1633,19 +3315,40 @@ function Process() {
 }
 
 /* ============================================================
-   INVESTMENT CTA
-   ============================================================ */
+   CTA
+============================================================ */
 
 function InvestmentCTA() {
   return (
-    <section className="section section--navy">
+    <section className="section">
       <div className="container">
-        <Reveal as="div" className="investment-cta__inner">
-          <h2>Ready to make your next property move?</h2>
-          <p>Speak with our team for tailored property advice, viewing support and investment guidance.</p>
-          <div className="investment-cta__buttons">
-            <a href="#contact" className="btn btn--gold" onClick={(e) => { e.preventDefault(); scrollToId("contact"); }}>Talk to an Expert</a>
-            <a href={waLink(WHATSAPP_DEFAULT_MESSAGE)} target="_blank" rel="noopener noreferrer" className="btn btn--outline">WhatsApp Us</a>
+        <Reveal>
+          <div className="cta">
+            <div className="cta-content">
+              <div className="eyebrow">Your next move</div>
+
+              <h2>
+                Let's find
+                <br />
+                what's <i>next.</i>
+              </h2>
+
+              <p>
+                Whether you're buying your first home, searching for a premium
+                rental or exploring your next investment, our team is ready to
+                help.
+              </p>
+
+              <a
+                href={WA()}
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-gold"
+              >
+                Start a conversation
+                <ArrowUpRight size={15} />
+              </a>
+            </div>
           </div>
         </Reveal>
       </div>
@@ -1654,158 +3357,174 @@ function InvestmentCTA() {
 }
 
 /* ============================================================
-   ABOUT
-   ============================================================ */
-
-function About() {
-  return (
-    <section id="about" className="section">
-      <div className="container about__inner">
-        <motion.div
-          className="about__image"
-          initial={{ opacity: 0, scale: 1.05 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <img
-            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
-            alt="Prime Property & Developers office team"
-            loading="lazy"
-          />
-        </motion.div>
-
-        <div className="about__copy">
-          <Reveal as="p" className="kicker">About us</Reveal>
-          <Reveal as="h2" className="heading" delay={0.05} style={{ marginBottom: 24 }}>
-            Your trusted real estate partner in Islamabad.
-          </Reveal>
-          <Reveal as="p" delay={0.1}>
-            Prime Property &amp; Developers Pvt. Ltd. is a real estate company based
-            in Islamabad, working with clients across the city&rsquo;s most
-            established sectors, including F-6, F-7, F-8, E-7 and Blue Area.
-          </Reveal>
-          <Reveal as="p" delay={0.15}>
-            We provide property marketing and consultancy, alongside support for
-            sales, purchases and rentals across both residential and commercial
-            properties &mdash; guided by what each client actually needs, from the
-            first conversation through to completion.
-          </Reveal>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ============================================================
    CONTACT
-   ============================================================ */
+============================================================ */
 
 function Contact() {
-  const [form, setForm] = useState({ name: "", phone: "", email: "", interest: "", message: "" });
-  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    interest: "Buying a property",
+    message: "",
+  });
 
-  function handleChange(field) {
-    return (event) => setForm((current) => ({ ...current, [field]: event.target.value }));
-  }
+  const [toast, setToast] = useState(false);
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const message = [
-      `New website inquiry from ${form.name}`,
-      `Phone: ${form.phone}`,
-      `Email: ${form.email}`,
-      `Interest: ${form.interest}`,
-      `Message: ${form.message}`,
-    ].join("\n");
-    window.open(waLink(message), "_blank", "noopener,noreferrer");
-    setSubmitted(true);
-    setForm({ name: "", phone: "", email: "", interest: "", message: "" });
-    setTimeout(() => setSubmitted(false), 5000);
-  }
+  const update = (key, value) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
+
+  const submit = (e) => {
+    e.preventDefault();
+
+    const message = `
+Hello Prime Property & Developers,
+
+Name: ${form.name}
+Phone: ${form.phone}
+Interest: ${form.interest}
+
+Message:
+${form.message || "I would like to discuss a property opportunity."}
+    `.trim();
+
+    window.open(WA(message), "_blank");
+
+    setToast(true);
+
+    setTimeout(() => setToast(false), 3500);
+  };
 
   return (
-    <section id="contact" className="section section--ivory">
+    <section id="contact" className="section section--cream">
       <div className="container">
-        <Reveal as="p" className="kicker">Get in touch</Reveal>
-        <Reveal as="h2" className="heading" delay={0.05}>Let&rsquo;s find your prime property.</Reveal>
+        <div className="contact-grid">
+          <Reveal>
+            <div>
+              <div className="eyebrow">Let's connect</div>
 
-        <div className="contact__grid">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.7 }}
-          >
-            <div className="contact__item">
-              <MapPin size={22} aria-hidden="true" />
-              <p>{COMPANY.address.map((line) => <span key={line}>{line}<br /></span>)}</p>
-            </div>
-            <div className="contact__item">
-              <Phone size={22} aria-hidden="true" />
-              <a href={`tel:+${COMPANY.phoneIntl}`}>{COMPANY.phone}</a>
-            </div>
-            <div className="contact__item">
-              <Mail size={22} aria-hidden="true" />
-              <a href={`mailto:${COMPANY.email}`}>{COMPANY.email}</a>
-            </div>
-          </motion.div>
+              <h2 className="section-title">
+                Have a property
+                <br />
+                <i>in mind?</i>
+              </h2>
 
-          <motion.form
-            className="contact__form"
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            onSubmit={handleSubmit}
-          >
-            <div className="contact__row">
-              <div className="contact__field">
-                <label htmlFor="name">Name</label>
-                <input id="name" type="text" required value={form.name} onChange={handleChange("name")} />
+              <p className="section-description">
+                Tell us what you're looking for and our team will help you
+                explore the right opportunities.
+              </p>
+
+              <div className="contact-list">
+                <div className="contact-item">
+                  <div className="contact-icon">
+                    <Phone size={18} />
+                  </div>
+
+                  <div>
+                    <strong>Call us</strong>
+                    <a href={`tel:+${COMPANY.phoneIntl}`}>
+                      {COMPANY.phone}
+                    </a>
+                  </div>
+                </div>
+
+                <div className="contact-item">
+                  <div className="contact-icon">
+                    <Mail size={18} />
+                  </div>
+
+                  <div>
+                    <strong>Email</strong>
+                    <a href={`mailto:${COMPANY.email}`}>
+                      {COMPANY.email}
+                    </a>
+                  </div>
+                </div>
+
+                <div className="contact-item">
+                  <div className="contact-icon">
+                    <MapPin size={18} />
+                  </div>
+
+                  <div>
+                    <strong>Visit us</strong>
+                    <span>{COMPANY.address}</span>
+                  </div>
+                </div>
               </div>
-              <div className="contact__field">
-                <label htmlFor="phone">Phone</label>
-                <input id="phone" type="tel" required value={form.phone} onChange={handleChange("phone")} />
-              </div>
             </div>
+          </Reveal>
 
-            <div className="contact__row">
-              <div className="contact__field">
-                <label htmlFor="email">Email</label>
-                <input id="email" type="email" required value={form.email} onChange={handleChange("email")} />
+          <Reveal delay={.12}>
+            <form className="contact-form" onSubmit={submit}>
+              <div className="form-grid">
+                <div className="form-field">
+                  <label>Your name</label>
+
+                  <input
+                    required
+                    value={form.name}
+                    onChange={(e) => update("name", e.target.value)}
+                    placeholder="Enter your name"
+                  />
+                </div>
+
+                <div className="form-field">
+                  <label>Phone number</label>
+
+                  <input
+                    required
+                    value={form.phone}
+                    onChange={(e) => update("phone", e.target.value)}
+                    placeholder="03XX XXXXXXX"
+                  />
+                </div>
+
+                <div className="form-field full">
+                  <label>I'm interested in</label>
+
+                  <select
+                    value={form.interest}
+                    onChange={(e) => update("interest", e.target.value)}
+                  >
+                    <option>Buying a property</option>
+                    <option>Renting a property</option>
+                    <option>Selling a property</option>
+                    <option>Property investment</option>
+                    <option>Commercial property</option>
+                    <option>General consultation</option>
+                  </select>
+                </div>
+
+                <div className="form-field full">
+                  <label>Message</label>
+
+                  <textarea
+                    value={form.message}
+                    onChange={(e) => update("message", e.target.value)}
+                    placeholder="Tell us what you're looking for..."
+                  />
+                </div>
               </div>
-              <div className="contact__field">
-                <label htmlFor="interest">Interest</label>
-                <select id="interest" required value={form.interest} onChange={handleChange("interest")}>
-                  <option value="" disabled>Select an option</option>
-                  {INTEREST_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
-                </select>
-              </div>
-            </div>
 
-            <div className="contact__field">
-              <label htmlFor="message">Message</label>
-              <textarea id="message" rows={5} required value={form.message} onChange={handleChange("message")} />
-            </div>
-
-            <button type="submit" className="btn btn--gold contact__submit">Send Inquiry</button>
-          </motion.form>
+              <button className="form-submit" type="submit">
+                <Send size={15} />
+                Send inquiry on WhatsApp
+              </button>
+            </form>
+          </Reveal>
         </div>
       </div>
 
       <AnimatePresence>
-        {submitted && (
+        {toast && (
           <motion.div
             className="toast"
-            initial={{ opacity: 0, y: 30, x: "-50%" }}
-            animate={{ opacity: 1, y: 0, x: "-50%" }}
-            exit={{ opacity: 0, y: 20, x: "-50%" }}
-            transition={{ duration: 0.35 }}
-            role="status"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
           >
-            <Check size={18} aria-hidden="true" />
-            Thank you. Your inquiry has been received. Prime Property &amp; Developers will be in touch.
+            <Check size={15} />
+            WhatsApp inquiry opened successfully
           </motion.div>
         )}
       </AnimatePresence>
@@ -1815,56 +3534,108 @@ function Contact() {
 
 /* ============================================================
    FOOTER
-   ============================================================ */
+============================================================ */
 
 function Footer() {
   return (
     <footer className="footer">
-      <div className="container footer__top">
-        <div className="footer__brand">
-          <span className="navbar__brand-mark navbar__brand-mark--footer">PP</span>
-          <h3>{COMPANY.legalName}</h3>
-          <p>Find your prime address.</p>
+      <div className="container">
+        <div className="footer-grid">
+          <div className="footer-brand">
+            <div className="brand">
+              <div className="brand-mark">
+                <span>PP</span>
+              </div>
+
+              <div className="brand-text">
+                <strong>Prime Property</strong>
+                <small>& Developers</small>
+              </div>
+            </div>
+
+            <p>
+              Premium property solutions for Islamabad's residential,
+              commercial and investment market.
+            </p>
+
+            <div className="socials">
+              <a
+                className="social"
+                href={COMPANY.facebook}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Facebook"
+              >
+                <Facebook size={15} />
+              </a>
+
+              <a
+                className="social"
+                href={COMPANY.instagram}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+              >
+                <Instagram size={15} />
+              </a>
+
+              <a
+                className="social"
+                href={COMPANY.twitter}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Twitter"
+              >
+                <ArrowUpRight size={15} />
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <div className="footer-title">Explore</div>
+
+            <div className="footer-links">
+              <a href="#home">Home</a>
+              <a href="#properties">Properties</a>
+              <a href="#services">Services</a>
+              <a href="#areas">Areas</a>
+            </div>
+          </div>
+
+          <div>
+            <div className="footer-title">Services</div>
+
+            <div className="footer-links">
+              <a href="#services">Property Sales</a>
+              <a href="#services">Property Rentals</a>
+              <a href="#services">Investment Advisory</a>
+              <a href="#services">Consultancy</a>
+            </div>
+          </div>
+
+          <div>
+            <div className="footer-title">Contact</div>
+
+            <div className="footer-links">
+              <a href={`tel:+${COMPANY.phoneIntl}`}>
+                {COMPANY.phone}
+              </a>
+
+              <a href={`mailto:${COMPANY.email}`}>
+                {COMPANY.email}
+              </a>
+
+              <a href="#contact">Islamabad, Pakistan</a>
+            </div>
+          </div>
         </div>
 
-        <div className="footer__col">
-          <h4>Company</h4>
-          <ul>
-            {NAV_LINKS.map((link) => (
-              <li key={link.id}>
-                <a href={`#${link.id}`} onClick={(e) => { e.preventDefault(); scrollToId(link.id); }}>{link.label}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <div className="footer-bottom">
+          <span>
+            © {new Date().getFullYear()} {COMPANY.legalName}
+          </span>
 
-        <div className="footer__col">
-          <h4>Services</h4>
-          <ul>
-            <li>Property Sales</li>
-            <li>Property Purchase</li>
-            <li>Rentals</li>
-            <li>Investment Consultancy</li>
-          </ul>
-        </div>
-
-        <div className="footer__col">
-          <h4>Contact</h4>
-          <ul>
-            <li><a href={`tel:+${COMPANY.phoneIntl}`}>{COMPANY.phone}</a></li>
-            <li><a href={`mailto:${COMPANY.email}`}>{COMPANY.email}</a></li>
-            <li>Islamabad, Pakistan</li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="container footer__bottom">
-        <p>&copy; 2026 {COMPANY.legalName} All rights reserved.</p>
-        <div className="footer__social">
-          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><Facebook size={18} aria-hidden="true" /></a>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={18} aria-hidden="true" /></a>
-          <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X"><Twitter size={18} aria-hidden="true" /></a>
-          <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><Music2 size={18} aria-hidden="true" /></a>
+          <span>Designed with a Prime standard.</span>
         </div>
       </div>
     </footer>
@@ -1872,92 +3643,131 @@ function Footer() {
 }
 
 /* ============================================================
-   FLOATING ELEMENTS
-   ============================================================ */
+   FLOATING ACTIONS
+============================================================ */
 
-function WhatsAppFloat() {
-  return (
-    <a href={waLink(WHATSAPP_DEFAULT_MESSAGE)} target="_blank" rel="noopener noreferrer" className="whatsapp-float" aria-label="Chat with us on WhatsApp">
-      <span className="whatsapp-float__pulse" aria-hidden="true" />
-      <MessageCircle size={26} aria-hidden="true" />
-      <span className="whatsapp-float__tooltip">Chat with us</span>
-    </a>
-  );
-}
+function FloatingActions() {
+  const [showTop, setShowTop] = useState(false);
 
-function BackToTop() {
-  const show = useScrollFlag(600);
+  useEffect(() => {
+    const handle = () => setShowTop(window.scrollY > 500);
+
+    handle();
+
+    window.addEventListener("scroll", handle, { passive: true });
+
+    return () => window.removeEventListener("scroll", handle);
+  }, []);
+
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.button
-          type="button"
-          className="back-to-top"
-          aria-label="Back to top"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.25 }}
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        >
-          <ArrowUp size={20} aria-hidden="true" />
-        </motion.button>
-      )}
-    </AnimatePresence>
+    <div className="floating-actions">
+      <motion.a
+        href={WA()}
+        target="_blank"
+        rel="noreferrer"
+        className="float-btn whatsapp"
+        aria-label="WhatsApp"
+        animate={{ y: [0, -4, 0] }}
+        transition={{ duration: 2.2, repeat: Infinity }}
+      >
+        <MessageCircle size={21} />
+      </motion.a>
+
+      <AnimatePresence>
+        {showTop && (
+          <motion.button
+            className="float-btn top-btn"
+            initial={{ opacity: 0, scale: .7 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: .7 }}
+            onClick={() =>
+              window.scrollTo({ top: 0, behavior: "smooth" })
+            }
+            aria-label="Back to top"
+          >
+            <ArrowDown
+              size={19}
+              style={{ transform: "rotate(180deg)" }}
+            />
+          </motion.button>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
 /* ============================================================
-   MAIN APP
-   ============================================================ */
+   APP
+============================================================ */
 
 export default function App() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [filters, setFilters] = useState({ purpose: "", type: "", location: "" });
   const [selectedProperty, setSelectedProperty] = useState(null);
-  const resultsRef = useRef(null);
 
-  useEffect(() => {
-    if (menuOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
-  }, [menuOpen]);
+  const [filters, setFilters] = useState({
+    purpose: "Buy",
+    type: "All",
+    location: "All",
+  });
 
-  function handleSearch() {
-    if (resultsRef.current) resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  const { scrollYProgress } = useScroll();
+
+  const handleSearch = (newFilters) => {
+    setFilters(newFilters);
+
+    setTimeout(() => {
+      scrollToId("properties");
+    }, 100);
+  };
 
   return (
-    <div className="pp-root">
+    <div className="app">
       <GlobalStyles />
-      <div className="grain" aria-hidden="true" />
-      <ScrollProgressBar />
 
-      <Navbar menuOpen={menuOpen} onOpenMenu={() => setMenuOpen(true)} onCloseMenu={() => setMenuOpen(false)} />
+      <motion.div
+        className="progress"
+        style={{ scaleX: scrollYProgress }}
+      />
 
-      <main>
-        <Hero filters={filters} setFilters={setFilters} onSearch={handleSearch} />
-        <Marquee />
-        <Stats />
-        <TrustSection />
-        <FeaturedProperties filters={filters} onView={setSelectedProperty} resultsRef={resultsRef} />
-        <Services />
-        <WhyPrime />
-        <Areas />
-        <Testimonials />
-        <Cinematic />
-        <Process />
-        <InvestmentCTA />
-        <About />
-        <Contact />
-      </main>
+      <Navbar />
+
+      <Hero />
+
+      <SearchBox onSearch={handleSearch} />
+
+      <Marquee />
+
+      <Stats />
+
+      <FeaturedProperties
+        filters={filters}
+        onSelect={setSelectedProperty}
+      />
+
+      <About />
+
+      <Services />
+
+      <Areas />
+
+      <Testimonials />
+
+      <Process />
+
+      <InvestmentCTA />
+
+      <Contact />
 
       <Footer />
-      <WhatsAppFloat />
-      <BackToTop />
+
+      <FloatingActions />
 
       <AnimatePresence>
-        {selectedProperty && <PropertyModal property={selectedProperty} onClose={() => setSelectedProperty(null)} />}
+        {selectedProperty && (
+          <PropertyModal
+            property={selectedProperty}
+            onClose={() => setSelectedProperty(null)}
+          />
+        )}
       </AnimatePresence>
     </div>
   );
