@@ -1,44 +1,45 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
+
 import {
-  AnimatePresence,
   motion,
-  useReducedMotion,
+  AnimatePresence,
   useScroll,
   useTransform,
+  useReducedMotion,
 } from "framer-motion";
+
 import {
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpRight,
-  Award,
-  Bath,
-  BedDouble,
-  Building2,
-  Check,
-  ChevronDown,
-  Clock3,
-  Compass,
-  Facebook,
-  Home,
-  Instagram,
-  KeyRound,
-  Landmark,
+  Menu,
+  X,
+  Phone,
   Mail,
   MapPin,
+  Bed,
+  Bath,
   Maximize,
-  Menu,
+  ArrowUpRight,
+  ArrowUp,
+  ArrowLeft,
+  ArrowRight,
   MessageCircle,
-  Phone,
-  Quote,
-  Search,
-  Send,
-  ShieldCheck,
-  Sparkles,
-  Star,
+  Check,
+  Building2,
+  Home as HomeIcon,
   TrendingUp,
-  Users,
-  X,
+  KeyRound,
+  Handshake,
+  Facebook,
+  Instagram,
+  Twitter,
+  Music2,
+  Search,
+  Quote,
 } from "lucide-react";
 
 /* ============================================================
@@ -51,2270 +52,3942 @@ const COMPANY = {
   phone: "0300 3794458",
   phoneIntl: "923003794458",
   email: "primepropertypk@gmail.com",
-  address:
-    "6 Mezzanine Floor, Mujahid Plaza, Jinnah Avenue, Block H, G-7/2, Blue Area, Islamabad, Pakistan",
-  instagram: "https://www.instagram.com/prime_property.developers/",
-  facebook: "https://www.facebook.com/Primepropertyanddevelopers/",
-  twitter: "https://x.com/PrimeProperty7",
-  tiktok: "https://www.tiktok.com/@prime_property_dev.com",
+
+  address: [
+    "6 Mezzanine Floor, Mujahid Plaza,",
+    "Jinnah Avenue, Block H, G-7/2,",
+    "Blue Area, Islamabad, Pakistan",
+  ],
+
+  instagram: "@prime_property.developers",
+  facebook: "Prime Property & Developers",
+  twitter: "@PrimeProperty7",
+  tiktok: "@prime_property_dev.com",
 };
 
-const WA = (message = "Hello Prime Property & Developers, I am interested in your property services.") =>
-  `https://wa.me/${COMPANY.phoneIntl}?text=${encodeURIComponent(message)}`;
+const WHATSAPP_DEFAULT_MESSAGE =
+  "Hello Prime Property & Developers, I am interested in learning more about your property services.";
+
+function waLink(message) {
+  return `https://wa.me/${COMPANY.phoneIntl}?text=${encodeURIComponent(
+    message
+  )}`;
+}
 
 /* ============================================================
-   DATA
+   NAVIGATION
 ============================================================ */
 
-const properties = [
+const NAV_LINKS = [
+  { label: "Home", id: "home" },
+  { label: "Properties", id: "properties" },
+  { label: "Services", id: "services" },
+  { label: "Areas", id: "areas" },
+  { label: "Clients", id: "testimonials" },
+  { label: "About", id: "about" },
+  { label: "Contact", id: "contact" },
+];
+
+/* ============================================================
+   SEARCH OPTIONS
+============================================================ */
+
+const LOOKING_FOR_OPTIONS = [
+  { value: "", label: "Buy, rent or invest" },
+  { value: "buy", label: "Buy" },
+  { value: "rent", label: "Rent" },
+  { value: "invest", label: "Invest" },
+];
+
+const PROPERTY_TYPE_OPTIONS = [
+  { value: "", label: "Any property type" },
+  { value: "house", label: "House" },
+  { value: "apartment", label: "Apartment" },
+  { value: "commercial", label: "Commercial" },
+];
+
+const LOCATION_OPTIONS = [
+  { value: "", label: "Any location" },
+  { value: "F-6", label: "F-6" },
+  { value: "F-7", label: "F-7" },
+  { value: "F-8", label: "F-8" },
+  { value: "E-7", label: "E-7" },
+  { value: "Blue Area", label: "Blue Area" },
+];
+
+/* ============================================================
+   PROPERTY DATA
+============================================================ */
+
+const PROPERTIES = [
   {
-    id: 1,
-    title: "Contemporary F-7 Residence",
+    id: "p1",
+    title: "Luxury Residence",
+    type: "house",
+    purpose: "buy",
     location: "F-7, Islamabad",
-    type: "House",
-    purpose: "Buy",
-    price: "PKR 8.95 Cr",
+    locationTag: "F-7",
+    price: "PKR 12.5 Crore",
+    size: "1 Kanal",
     beds: 5,
     baths: 6,
-    area: "500 Sq. Yd.",
     image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=85",
-    tag: "Featured",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1400&q=85",
     description:
-      "A sophisticated family residence combining spacious interiors, premium finishes and an exceptional Islamabad location.",
+      "A stately residence set on a full kanal in F-7, built for families who expect space, privacy and quiet refinement in equal measure.",
+    features: [
+      "Double-height living and dining spaces",
+      "Landscaped lawn with covered seating",
+      "Staff quarters and dedicated service areas",
+      "Covered parking for multiple vehicles",
+    ],
   },
+
   {
-    id: 2,
-    title: "Modern F-8 Family Home",
+    id: "p2",
+    title: "Modern Family Home",
+    type: "house",
+    purpose: "buy",
+    location: "F-6, Islamabad",
+    locationTag: "F-6",
+    price: "PKR 8.75 Crore",
+    size: "10 Marla",
+    beds: 4,
+    baths: 5,
+    image:
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=85",
+    description:
+      "A well-proportioned 10 Marla home in F-6, designed around natural light and an easy flow between everyday living areas.",
+    features: [
+      "Open-plan kitchen and family lounge",
+      "Sun-lit terrace and study nook",
+      "Modern fittings throughout",
+      "Secure, gated street",
+    ],
+  },
+
+  {
+    id: "p3",
+    title: "Contemporary Villa",
+    type: "house",
+    purpose: "buy",
+    location: "E-7, Islamabad",
+    locationTag: "E-7",
+    price: "PKR 18 Crore",
+    size: "2 Kanal",
+    beds: 6,
+    baths: 7,
+    image:
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1400&q=85",
+    description:
+      "An expansive two-kanal villa in E-7, combining generous entertaining spaces with private wings for extended family living.",
+    features: [
+      "Formal and informal living areas",
+      "Home theatre and library room",
+      "Mature gardens with outdoor seating",
+      "Independent guest suite",
+    ],
+  },
+
+  {
+    id: "p4",
+    title: "Premium Commercial Floor",
+    type: "commercial",
+    purpose: "invest",
+    location: "Blue Area, Islamabad",
+    locationTag: "Blue Area",
+    price: "Contact for price",
+    size: "5,000 sq ft",
+    beds: null,
+    baths: null,
+    image:
+      "https://images.unsplash.com/photo-1524230507669-5ff97982bb5e?auto=format&fit=crop&w=1400&q=85",
+    description:
+      "A prominent commercial floor plate in Blue Area, positioned for businesses that want visibility in Islamabad's commercial core.",
+    features: [
+      "Prime Blue Area frontage",
+      "Flexible open floor plan",
+      "Elevator access and dedicated parking",
+      "Close to major banks and corporate offices",
+    ],
+  },
+
+  {
+    id: "p5",
+    title: "Executive Residence",
+    type: "house",
+    purpose: "buy",
     location: "F-8, Islamabad",
-    type: "House",
-    purpose: "Buy",
-    price: "PKR 6.75 Cr",
+    locationTag: "F-8",
+    price: "PKR 10.5 Crore",
+    size: "1 Kanal",
     beds: 5,
     baths: 5,
-    area: "400 Sq. Yd.",
     image:
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=85",
-    tag: "Prime Pick",
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1400&q=85",
     description:
-      "A refined contemporary home with generous living spaces and excellent access to the city's key destinations.",
+      "A comfortable, well-maintained residence in F-8, suited to a household that values a settled, established neighbourhood.",
+    features: [
+      "Spacious bedrooms with attached baths",
+      "Separate drawing and dining rooms",
+      "Rooftop terrace",
+      "Ample front and side lawn",
+    ],
   },
+
   {
-    id: 3,
-    title: "Executive E-7 Residence",
-    location: "E-7, Islamabad",
-    type: "House",
-    purpose: "Buy",
-    price: "PKR 12.50 Cr",
-    beds: 6,
-    baths: 7,
-    area: "1000 Sq. Yd.",
-    image:
-      "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1600&q=85",
-    tag: "Luxury",
-    description:
-      "An expansive executive property positioned in one of Islamabad's most sought-after residential sectors.",
-  },
-  {
-    id: 4,
-    title: "Blue Area Business Tower",
+    id: "p6",
+    title: "Commercial Investment Block",
+    type: "commercial",
+    purpose: "invest",
     location: "Blue Area, Islamabad",
-    type: "Commercial",
-    purpose: "Invest",
-    price: "PKR 18.00 Cr",
-    beds: 0,
-    baths: 4,
-    area: "12,000 Sq. Ft.",
+    locationTag: "Blue Area",
+    price: "Contact for price",
+    size: "Multiple floors",
+    beds: null,
+    baths: null,
     image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=85",
-    tag: "Investment",
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1400&q=85",
     description:
-      "A commercial opportunity in Islamabad's central business district, suitable for corporate and investment purposes.",
+      "A multi-floor commercial opportunity in the heart of Blue Area, suited to investors seeking a foothold in Islamabad's business district.",
+    features: [
+      "Multiple leasable floors",
+      "High footfall business district",
+      "Suitable for offices or retail",
+      "Strong long-term rental potential",
+    ],
   },
+
   {
-    id: 5,
-    title: "Luxury F-6 Villa",
-    location: "F-6, Islamabad",
-    type: "House",
-    purpose: "Buy",
-    price: "PKR 10.25 Cr",
-    beds: 6,
-    baths: 7,
-    area: "800 Sq. Yd.",
-    image:
-      "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1600&q=85",
-    tag: "Luxury",
-    description:
-      "A statement villa with elegant architecture, privacy and premium living spaces in F-6.",
-  },
-  {
-    id: 6,
-    title: "Blue Area Executive Office",
-    location: "Blue Area, Islamabad",
-    type: "Commercial",
-    purpose: "Rent",
-    price: "PKR 4.50 Lac/mo",
-    beds: 0,
-    baths: 2,
-    area: "3,500 Sq. Ft.",
-    image:
-      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1600&q=85",
-    tag: "Commercial",
-    description:
-      "A professional office environment for businesses looking for a prestigious Blue Area address.",
-  },
-  {
-    id: 7,
-    title: "Elegant F-7 Apartment",
-    location: "F-7, Islamabad",
-    type: "Apartment",
-    purpose: "Rent",
-    price: "PKR 3.25 Lac/mo",
+    id: "p7",
+    title: "Skyline Apartment",
+    type: "apartment",
+    purpose: "rent",
+    location: "F-8, Islamabad",
+    locationTag: "F-8",
+    price: "PKR 275,000 / month",
+    size: "2,200 sq ft",
     beds: 3,
     baths: 3,
-    area: "2,800 Sq. Ft.",
     image:
-      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1600&q=85",
-    tag: "Rental",
+      "https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&w=1400&q=85",
     description:
-      "A beautifully appointed apartment offering comfort, convenience and an upscale lifestyle.",
+      "A bright, contemporary apartment available for rent in F-8, offering low-maintenance living close to Islamabad's commercial hubs.",
+    features: [
+      "Modern open-plan interior",
+      "Balcony with sector views",
+      "Dedicated covered parking",
+      "Round-the-clock building security",
+    ],
   },
-];
-
-const areas = [
-  {
-    name: "F-6",
-    subtitle: "Established luxury",
-    image:
-      "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    name: "F-7",
-    subtitle: "Premium residential",
-    image:
-      "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    name: "F-8",
-    subtitle: "Family living",
-    image:
-      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    name: "E-7",
-    subtitle: "Ultra prime",
-    image:
-      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    name: "Blue Area",
-    subtitle: "Business district",
-    image:
-      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80",
-  },
-];
-
-const services = [
-  {
-    icon: Home,
-    number: "01",
-    title: "Property Sales",
-    text: "Strategic buying and selling support for residential and commercial properties.",
-  },
-  {
-    icon: KeyRound,
-    number: "02",
-    title: "Property Rentals",
-    text: "Find quality rental opportunities matched to your lifestyle and business needs.",
-  },
-  {
-    icon: TrendingUp,
-    number: "03",
-    title: "Investment Advisory",
-    text: "Identify opportunities with a practical approach to location, value and growth.",
-  },
-  {
-    icon: Landmark,
-    number: "04",
-    title: "Property Consultancy",
-    text: "Professional guidance throughout your property journey, from search to closing.",
-  },
-];
-
-const testimonials = [
-  {
-    name: "Satisfied Client",
-    role: "Property Buyer",
-    quote:
-      "The team made the entire property search feel simple and professional. Their understanding of Islamabad's market was impressive.",
-  },
-  {
-    name: "Satisfied Investor",
-    role: "Property Investor",
-    quote:
-      "Prime Property & Developers provided clear guidance and helped us evaluate opportunities with much more confidence.",
-  },
-  {
-    name: "Satisfied Client",
-    role: "Home Owner",
-    quote:
-      "Professional communication, good market knowledge and a very smooth overall experience.",
-  },
-  {
-    name: "Satisfied Client",
-    role: "Property Seller",
-    quote:
-      "Their team understood what we needed and handled the process with care and professionalism.",
-  },
-];
-
-const stats = [
-  { value: 12, suffix: "+", label: "Years of Experience" },
-  { value: 480, suffix: "+", label: "Properties Handled" },
-  { value: 5, suffix: "", label: "Prime Areas" },
-  { value: 96, suffix: "%", label: "Client Satisfaction" },
 ];
 
 /* ============================================================
-   GLOBAL CSS
+   AREAS
 ============================================================ */
 
-const GlobalStyles = () => (
-  <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700;800&display=swap');
-
-    :root {
-      --navy: #081225;
-      --navy-2: #0c1830;
-      --navy-3: #111f3b;
-      --gold: #c9a45c;
-      --gold-light: #e6c985;
-      --cream: #f7f3eb;
-      --white: #ffffff;
-      --muted: #718096;
-      --line: rgba(201,164,92,.18);
-      --dark-line: rgba(255,255,255,.1);
-      --shadow: 0 25px 80px rgba(5,14,30,.13);
-      --radius: 22px;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-      scroll-padding-top: 85px;
-    }
-
-    body {
-      margin: 0;
-      font-family: "Manrope", sans-serif;
-      background: var(--white);
-      color: var(--navy);
-      overflow-x: hidden;
-    }
-
-    body, button, input, select, textarea {
-      font-family: "Manrope", sans-serif;
-    }
-
-    button, a {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    button {
-      border: 0;
-      cursor: pointer;
-    }
-
-    img {
-      display: block;
-      max-width: 100%;
-    }
-
-    .app {
-      min-height: 100vh;
-      overflow: hidden;
-    }
-
-    .container {
-      width: min(1180px, calc(100% - 48px));
-      margin: 0 auto;
-    }
-
-    .section {
-      position: relative;
-      padding: 110px 0;
-    }
-
-    .section--cream {
-      background: var(--cream);
-    }
-
-    .section--navy {
-      background: var(--navy);
-      color: white;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      color: var(--gold);
-      text-transform: uppercase;
-      letter-spacing: .2em;
-      font-size: 11px;
-      font-weight: 800;
-      margin-bottom: 18px;
-    }
-
-    .eyebrow::before {
-      content: "";
-      width: 28px;
-      height: 1px;
-      background: currentColor;
-    }
-
-    .section-heading {
-      max-width: 720px;
-      margin-bottom: 55px;
-    }
-
-    .section-heading.center {
-      margin-left: auto;
-      margin-right: auto;
-      text-align: center;
-    }
-
-    .section-heading.center .eyebrow {
-      justify-content: center;
-    }
-
-    .section-title {
-      margin: 0;
-      font-family: "Playfair Display", serif;
-      font-size: clamp(40px, 5vw, 68px);
-      line-height: .98;
-      letter-spacing: -.045em;
-      font-weight: 600;
-    }
-
-    .section-description {
-      margin: 22px 0 0;
-      color: var(--muted);
-      line-height: 1.9;
-      font-size: 15px;
-      max-width: 650px;
-    }
-
-    .section--navy .section-description {
-      color: rgba(255,255,255,.62);
-    }
-
-    /* progress */
-    .progress {
-      position: fixed;
-      z-index: 100;
-      top: 0;
-      left: 0;
-      height: 3px;
-      background: var(--gold);
-      transform-origin: left;
-    }
-
-    /* navbar */
-    .navbar {
-      position: fixed;
-      z-index: 90;
-      top: 0;
-      left: 0;
-      width: 100%;
-      padding: 20px 0;
-      transition: .35s ease;
-    }
-
-    .navbar.scrolled {
-      background: rgba(8,18,37,.94);
-      backdrop-filter: blur(18px);
-      padding: 12px 0;
-      box-shadow: 0 10px 35px rgba(0,0,0,.16);
-    }
-
-    .nav-inner {
-      width: min(1250px, calc(100% - 38px));
-      margin: auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 30px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: white;
-      min-width: 220px;
-    }
-
-    .brand-mark {
-      width: 43px;
-      height: 43px;
-      border: 1px solid var(--gold);
-      display: grid;
-      place-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .brand-mark::before {
-      content: "";
-      position: absolute;
-      inset: 6px;
-      border: 1px solid rgba(201,164,92,.5);
-    }
-
-    .brand-mark span {
-      position: relative;
-      font-family: "Playfair Display", serif;
-      color: var(--gold);
-      font-size: 17px;
-      font-weight: 700;
-    }
-
-    .brand-text strong {
-      display: block;
-      font-family: "Playfair Display", serif;
-      font-size: 16px;
-      letter-spacing: .01em;
-    }
-
-    .brand-text small {
-      display: block;
-      color: rgba(255,255,255,.55);
-      font-size: 8px;
-      letter-spacing: .15em;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .nav-link {
-      color: rgba(255,255,255,.78);
-      font-size: 12px;
-      font-weight: 700;
-      padding: 11px 13px;
-      border-radius: 999px;
-      transition: .25s ease;
-    }
-
-    .nav-link:hover {
-      color: white;
-      background: rgba(255,255,255,.07);
-    }
-
-    .nav-contact {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--navy);
-      background: var(--gold);
-      padding: 12px 17px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 800;
-      white-space: nowrap;
-      transition: .3s ease;
-    }
-
-    .nav-contact:hover {
-      background: var(--gold-light);
-      transform: translateY(-2px);
-    }
-
-    .menu-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.08);
-      color: white;
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* mobile nav */
-    .mobile-menu {
-      position: fixed;
-      z-index: 89;
-      inset: 0;
-      background: var(--navy);
-      padding: 105px 24px 30px;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-
-    .mobile-menu-links {
-      display: grid;
-      gap: 5px;
-    }
-
-    .mobile-link {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: white;
-      font-family: "Playfair Display", serif;
-      font-size: clamp(30px, 8vw, 46px);
-      padding: 14px 0;
-      border-bottom: 1px solid var(--dark-line);
-    }
-
-    .mobile-link svg {
-      color: var(--gold);
-      width: 22px;
-    }
-
-    .mobile-contact {
-      margin-top: auto;
-      padding-top: 30px;
-      display: grid;
-      gap: 10px;
-    }
-
-    .mobile-contact a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: rgba(255,255,255,.7);
-      padding: 13px 0;
-    }
-
-    /* hero */
-    .hero {
-      min-height: 850px;
-      height: 100svh;
-      max-height: 980px;
-      position: relative;
-      background: var(--navy);
-      color: white;
-      display: flex;
-      align-items: center;
-      overflow: hidden;
-    }
-
-    .hero-image {
-      position: absolute;
-      inset: -5%;
-      background:
-        linear-gradient(90deg, rgba(4,10,22,.92) 0%, rgba(4,10,22,.67) 42%, rgba(4,10,22,.3) 100%),
-        linear-gradient(0deg, rgba(4,10,22,.58), transparent 40%),
-        url("https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=2200&q=90")
-        center/cover no-repeat;
-      transform-origin: center;
-    }
-
-    .hero-grid {
-      position: absolute;
-      inset: 0;
-      opacity: .07;
-      background-image:
-        linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
-      background-size: 80px 80px;
-      mask-image: linear-gradient(to bottom, black, transparent 90%);
-    }
-
-    .hero-orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(1px);
-      border: 1px solid rgba(201,164,92,.25);
-    }
-
-    .hero-orb.one {
-      width: 320px;
-      height: 320px;
-      right: -120px;
-      top: 17%;
-    }
-
-    .hero-orb.two {
-      width: 180px;
-      height: 180px;
-      right: 19%;
-      bottom: 4%;
-      opacity: .5;
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      width: min(1180px, calc(100% - 48px));
-      margin: auto;
-      padding-top: 75px;
-    }
-
-    .hero-copy {
-      max-width: 760px;
-    }
-
-    .hero-kicker {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--gold-light);
-      text-transform: uppercase;
-      font-size: 10px;
-      letter-spacing: .25em;
-      font-weight: 800;
-      margin-bottom: 22px;
-    }
-
-    .hero-kicker span {
-      width: 42px;
-      height: 1px;
-      background: var(--gold);
-    }
-
-    .hero-title {
-      font-family: "Playfair Display", serif;
-      font-weight: 500;
-      font-size: clamp(54px, 8vw, 104px);
-      line-height: .88;
-      letter-spacing: -.055em;
-      margin: 0;
-    }
-
-    .hero-title em {
-      color: var(--gold-light);
-      font-style: italic;
-    }
-
-    .hero-description {
-      max-width: 590px;
-      color: rgba(255,255,255,.68);
-      line-height: 1.85;
-      margin: 28px 0;
-      font-size: 15px;
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      min-height: 48px;
-      padding: 13px 19px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .02em;
-      transition: .3s ease;
-    }
-
-    .btn svg {
-      transition: transform .3s ease;
-    }
-
-    .btn:hover svg {
-      transform: translateX(3px);
-    }
-
-    .btn-gold {
-      background: var(--gold);
-      color: var(--navy);
-    }
-
-    .btn-gold:hover {
-      background: var(--gold-light);
-      transform: translateY(-3px);
-      box-shadow: 0 15px 35px rgba(201,164,92,.22);
-    }
-
-    .btn-outline {
-      border: 1px solid rgba(255,255,255,.28);
-      color: white;
-      background: rgba(255,255,255,.04);
-    }
-
-    .btn-outline:hover {
-      border-color: var(--gold);
-      background: rgba(201,164,92,.08);
-      transform: translateY(-3px);
-    }
-
-    .hero-trust {
-      margin-top: 48px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-      color: rgba(255,255,255,.5);
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: .15em;
-      font-weight: 700;
-    }
-
-    .hero-trust span {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-
-    .hero-trust svg {
-      color: var(--gold);
-    }
-
-    .scroll-indicator {
-      position: absolute;
-      z-index: 2;
-      right: 38px;
-      bottom: 35px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      color: rgba(255,255,255,.45);
-      font-size: 8px;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-    }
-
-    .scroll-line {
-      width: 1px;
-      height: 55px;
-      background: linear-gradient(var(--gold), transparent);
-    }
-
-    /* search */
-    .search-wrap {
-      position: relative;
-      z-index: 5;
-      margin-top: -70px;
-    }
-
-    .search-panel {
-      background: rgba(255,255,255,.96);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,.8);
-      border-radius: 24px;
-      padding: 18px;
-      box-shadow: 0 30px 80px rgba(8,18,37,.18);
-    }
-
-    .search-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 2px 5px 15px;
-    }
-
-    .search-title {
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .15em;
-      color: var(--navy);
-    }
-
-    .search-label {
-      color: var(--gold);
-      font-size: 9px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-    }
-
-    .search-fields {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1.25fr auto;
-      gap: 10px;
-    }
-
-    .field {
-      min-width: 0;
-      position: relative;
-    }
-
-    .field select {
-      width: 100%;
-      min-height: 56px;
-      appearance: none;
-      border: 1px solid #e6e9ee;
-      background: #fafafa;
-      color: var(--navy);
-      border-radius: 15px;
-      padding: 0 42px 0 43px;
-      outline: none;
-      font-size: 12px;
-      font-weight: 700;
-      transition: .25s ease;
-    }
-
-    .field select:focus {
-      border-color: var(--gold);
-      background: white;
-      box-shadow: 0 0 0 4px rgba(201,164,92,.09);
-    }
-
-    .field-icon {
-      position: absolute;
-      left: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--gold);
-      width: 17px;
-      pointer-events: none;
-    }
-
-    .field-chevron {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #98a1af;
-      width: 14px;
-      pointer-events: none;
-    }
-
-    .search-btn {
-      min-height: 56px;
-      min-width: 125px;
-      border-radius: 15px;
-      background: var(--navy);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 11px;
-      font-weight: 800;
-      transition: .3s ease;
-    }
-
-    .search-btn:hover {
-      background: var(--gold);
-      color: var(--navy);
-      transform: translateY(-2px);
-    }
-
-    /* marquee */
-    .marquee {
-      overflow: hidden;
-      border-bottom: 1px solid var(--line);
-      border-top: 1px solid var(--line);
-      background: white;
-    }
-
-    .marquee-track {
-      display: flex;
-      width: max-content;
-      animation: marquee 28s linear infinite;
-    }
-
-    .marquee-item {
-      display: flex;
-      align-items: center;
-      gap: 25px;
-      padding: 17px 30px;
-      font-family: "Playfair Display", serif;
-      font-size: 18px;
-      color: var(--navy);
-      white-space: nowrap;
-    }
-
-    .marquee-item span {
-      color: var(--gold);
-      font-size: 12px;
-    }
-
-    @keyframes marquee {
-      to { transform: translateX(-50%); }
-    }
-
-    /* stats */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0;
-      border-top: 1px solid var(--line);
-    }
-
-    .stat {
-      padding: 40px 25px;
-      border-right: 1px solid var(--line);
-      position: relative;
-    }
-
-    .stat:last-child {
-      border-right: 0;
-    }
-
-    .stat-icon {
-      color: var(--gold);
-      margin-bottom: 20px;
-    }
-
-    .stat-number {
-      font-family: "Playfair Display", serif;
-      font-size: clamp(38px, 5vw, 56px);
-      line-height: 1;
-      color: var(--navy);
-    }
-
-    .stat-label {
-      color: var(--muted);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-      font-weight: 800;
-      margin-top: 9px;
-    }
-
-    /* properties */
-    .property-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 22px;
-    }
-
-    .property-card {
-      min-width: 0;
-      background: white;
-      border: 1px solid #e9e9e6;
-      border-radius: var(--radius);
-      overflow: hidden;
-      transition: .45s cubic-bezier(.2,.7,.2,1);
-      cursor: pointer;
-      box-shadow: 0 5px 25px rgba(8,18,37,.03);
-    }
-
-    .property-card:hover {
-      transform: translateY(-9px);
-      border-color: rgba(201,164,92,.5);
-      box-shadow: var(--shadow);
-    }
-
-    .property-image {
-      height: 260px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .property-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform .8s cubic-bezier(.2,.7,.2,1);
-    }
-
-    .property-card:hover .property-image img {
-      transform: scale(1.08);
-    }
-
-    .property-image::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(0deg, rgba(8,18,37,.45), transparent 60%);
-    }
-
-    .property-tag {
-      position: absolute;
-      z-index: 2;
-      top: 14px;
-      left: 14px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: rgba(8,18,37,.82);
-      color: var(--gold-light);
-      font-size: 8px;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-      font-weight: 800;
-      backdrop-filter: blur(10px);
-    }
-
-    .property-arrow {
-      position: absolute;
-      z-index: 2;
-      right: 14px;
-      bottom: 14px;
-      width: 40px;
-      height: 40px;
-      display: grid;
-      place-items: center;
-      border-radius: 50%;
-      background: white;
-      color: var(--navy);
-      transition: .3s ease;
-    }
-
-    .property-card:hover .property-arrow {
-      background: var(--gold);
-      transform: rotate(45deg);
-    }
-
-    .property-body {
-      padding: 20px;
-    }
-
-    .property-location {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      color: var(--gold);
-      font-size: 9px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      margin-bottom: 9px;
-    }
-
-    .property-title {
-      margin: 0;
-      font-family: "Playfair Display", serif;
-      font-size: 23px;
-      line-height: 1.1;
-      font-weight: 600;
-    }
-
-    .property-price {
-      margin-top: 15px;
-      font-size: 17px;
-      color: var(--navy);
-      font-weight: 800;
-    }
-
-    .property-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 13px;
-      margin-top: 17px;
-      padding-top: 14px;
-      border-top: 1px solid #ecece9;
-      color: #7b8491;
-      font-size: 9px;
-      font-weight: 700;
-    }
-
-    .property-meta span {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    /* split section */
-    .split {
-      display: grid;
-      grid-template-columns: .95fr 1.05fr;
-      gap: 75px;
-      align-items: center;
-    }
-
-    .image-stack {
-      position: relative;
-      min-height: 570px;
-    }
-
-    .image-main {
-      width: 78%;
-      height: 500px;
-      object-fit: cover;
-      border-radius: 22px;
-    }
-
-    .image-small {
-      position: absolute;
-      right: 0;
-      bottom: 0;
-      width: 43%;
-      height: 245px;
-      object-fit: cover;
-      border: 12px solid var(--white);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-    }
-
-    .floating-badge {
-      position: absolute;
-      top: 35px;
-      right: 5%;
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: var(--gold);
-      color: var(--navy);
-      display: grid;
-      place-items: center;
-      text-align: center;
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      font-weight: 900;
-      box-shadow: 0 20px 45px rgba(201,164,92,.25);
-    }
-
-    .floating-badge svg {
-      display: block;
-      margin: 0 auto 5px;
-    }
-
-    .check-list {
-      display: grid;
-      gap: 15px;
-      margin: 30px 0;
-    }
-
-    .check-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      color: #4e5968;
-      line-height: 1.7;
-      font-size: 13px;
-    }
-
-    .check-item-icon {
-      flex: 0 0 25px;
-      width: 25px;
-      height: 25px;
-      border-radius: 50%;
-      background: rgba(201,164,92,.12);
-      color: var(--gold);
-      display: grid;
-      place-items: center;
-    }
-
-    /* services */
-    .services-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 1px;
-      background: var(--dark-line);
-      border: 1px solid var(--dark-line);
-    }
-
-    .service {
-      min-width: 0;
-      padding: 35px 28px;
-      background: var(--navy);
-      min-height: 300px;
-      transition: .35s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .service:hover {
-      background: var(--navy-3);
-    }
-
-    .service-number {
-      color: rgba(255,255,255,.2);
-      font-family: "Playfair Display", serif;
-      font-size: 42px;
-    }
-
-    .service-icon {
-      color: var(--gold);
-      margin: 28px 0 22px;
-    }
-
-    .service h3 {
-      margin: 0 0 12px;
-      font-family: "Playfair Display", serif;
-      font-size: 25px;
-      font-weight: 500;
-    }
-
-    .service p {
-      color: rgba(255,255,255,.55);
-      font-size: 12px;
-      line-height: 1.8;
-      margin: 0;
-    }
-
-    .service::after {
-      content: "";
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      right: -50px;
-      bottom: -50px;
-      border-radius: 50%;
-      border: 1px solid rgba(201,164,92,.16);
-      transition: .5s ease;
-    }
-
-    .service:hover::after {
-      transform: scale(2);
-    }
-
-    /* areas */
-    .areas-grid {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0,1fr));
-      gap: 12px;
-    }
-
-    .area {
-      height: 420px;
-      position: relative;
-      overflow: hidden;
-      border-radius: 20px;
-      cursor: pointer;
-    }
-
-    .area img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: .8s cubic-bezier(.2,.7,.2,1);
-    }
-
-    .area:hover img {
-      transform: scale(1.1);
-    }
-
-    .area::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(0deg, rgba(4,10,22,.88), transparent 60%);
-    }
-
-    .area-content {
-      position: absolute;
-      z-index: 2;
-      left: 22px;
-      right: 22px;
-      bottom: 22px;
-      color: white;
-    }
-
-    .area-content h3 {
-      font-family: "Playfair Display", serif;
-      font-size: 30px;
-      margin: 0 0 5px;
-    }
-
-    .area-content p {
-      margin: 0;
-      color: rgba(255,255,255,.62);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-    }
-
-    /* testimonials */
-    .testimonial-wrap {
-      max-width: 880px;
-      margin: auto;
-      text-align: center;
-    }
-
-    .quote-icon {
-      color: var(--gold);
-      margin: 0 auto 25px;
-    }
-
-    .testimonial-quote {
-      font-family: "Playfair Display", serif;
-      font-size: clamp(26px, 4vw, 44px);
-      line-height: 1.25;
-      font-weight: 400;
-      margin: 0;
-    }
-
-    .stars {
-      display: flex;
-      justify-content: center;
-      gap: 4px;
-      margin: 28px 0 16px;
-      color: var(--gold);
-    }
-
-    .testimonial-name {
-      font-size: 12px;
-      font-weight: 800;
-      margin: 0;
-    }
-
-    .testimonial-role {
-      color: rgba(255,255,255,.45);
-      font-size: 10px;
-      margin-top: 4px;
-    }
-
-    .slider-controls {
-      display: flex;
-      justify-content: center;
-      gap: 9px;
-      margin-top: 35px;
-    }
-
-    .slider-btn {
-      width: 44px;
-      height: 44px;
-      display: grid;
-      place-items: center;
-      border-radius: 50%;
-      color: white;
-      border: 1px solid var(--dark-line);
-      background: transparent;
-      transition: .25s ease;
-    }
-
-    .slider-btn:hover {
-      background: var(--gold);
-      color: var(--navy);
-      border-color: var(--gold);
-    }
-
-    /* process */
-    .process-grid {
-      display: grid;
-      grid-template-columns: repeat(4,1fr);
-      gap: 25px;
-    }
-
-    .process-card {
-      position: relative;
-      padding: 30px 0;
-      border-top: 1px solid var(--line);
-    }
-
-    .process-card:not(:last-child)::after {
-      content: "";
-      position: absolute;
-      width: 35px;
-      height: 1px;
-      right: -30px;
-      top: -1px;
-      background: var(--gold);
-    }
-
-    .process-number {
-      font-family: "Playfair Display", serif;
-      color: var(--gold);
-      font-size: 40px;
-    }
-
-    .process-card h3 {
-      font-family: "Playfair Display", serif;
-      font-size: 23px;
-      margin: 20px 0 10px;
-    }
-
-    .process-card p {
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.8;
-      margin: 0;
-    }
-
-    /* CTA */
-    .cta {
-      position: relative;
-      overflow: hidden;
-      padding: 80px;
-      border-radius: 30px;
-      background:
-        linear-gradient(90deg, rgba(8,18,37,.96), rgba(8,18,37,.72)),
-        url("https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1800&q=85")
-        center/cover;
-      color: white;
-    }
-
-    .cta::before {
-      content: "";
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      right: -180px;
-      top: -180px;
-      border: 1px solid rgba(201,164,92,.2);
-      border-radius: 50%;
-    }
-
-    .cta-content {
-      position: relative;
-      max-width: 700px;
-    }
-
-    .cta h2 {
-      font-family: "Playfair Display", serif;
-      font-size: clamp(42px, 6vw, 68px);
-      line-height: .98;
-      font-weight: 500;
-      margin: 0;
-    }
-
-    .cta p {
-      color: rgba(255,255,255,.6);
-      max-width: 560px;
-      line-height: 1.8;
-      font-size: 13px;
-      margin: 20px 0 28px;
-    }
-
-    /* contact */
-    .contact-grid {
-      display: grid;
-      grid-template-columns: .85fr 1.15fr;
-      gap: 70px;
-      align-items: start;
-    }
-
-    .contact-list {
-      display: grid;
-      gap: 17px;
-      margin-top: 35px;
-    }
-
-    .contact-item {
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-    }
-
-    .contact-icon {
-      width: 45px;
-      height: 45px;
-      flex: 0 0 45px;
-      border-radius: 50%;
-      background: rgba(201,164,92,.1);
-      color: var(--gold);
-      display: grid;
-      place-items: center;
-    }
-
-    .contact-item strong {
-      display: block;
-      font-size: 12px;
-      margin-bottom: 5px;
-    }
-
-    .contact-item span,
-    .contact-item a {
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.7;
-    }
-
-    .contact-form {
-      background: var(--cream);
-      border-radius: 25px;
-      padding: 30px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 13px;
-    }
-
-    .form-field {
-      min-width: 0;
-    }
-
-    .form-field.full {
-      grid-column: 1 / -1;
-    }
-
-    .form-field label {
-      display: block;
-      color: #596372;
-      font-size: 9px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-      margin: 0 0 7px 4px;
-    }
-
-    .form-field input,
-    .form-field select,
-    .form-field textarea {
-      width: 100%;
-      border: 1px solid #e2dfd8;
-      background: white;
-      border-radius: 12px;
-      padding: 14px;
-      outline: none;
-      color: var(--navy);
-      font-size: 12px;
-      resize: vertical;
-      transition: .25s ease;
-    }
-
-    .form-field textarea {
-      min-height: 120px;
-    }
-
-    .form-field input:focus,
-    .form-field select:focus,
-    .form-field textarea:focus {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 4px rgba(201,164,92,.08);
-    }
-
-    .form-submit {
-      width: 100%;
-      margin-top: 13px;
-      min-height: 52px;
-      border-radius: 13px;
-      background: var(--navy);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 9px;
-      font-size: 11px;
-      font-weight: 800;
-      transition: .3s ease;
-    }
-
-    .form-submit:hover {
-      background: var(--gold);
-      color: var(--navy);
-    }
-
-    /* footer */
-    .footer {
-      background: #050b17;
-      color: white;
-      padding: 70px 0 25px;
-    }
-
-    .footer-grid {
-      display: grid;
-      grid-template-columns: 1.5fr 1fr 1fr 1fr;
-      gap: 45px;
-      padding-bottom: 55px;
-      border-bottom: 1px solid var(--dark-line);
-    }
-
-    .footer-brand p {
-      max-width: 330px;
-      color: rgba(255,255,255,.45);
-      font-size: 11px;
-      line-height: 1.9;
-      margin: 20px 0;
-    }
-
-    .footer-title {
-      color: var(--gold);
-      text-transform: uppercase;
-      letter-spacing: .15em;
-      font-size: 9px;
-      font-weight: 800;
-      margin-bottom: 20px;
-    }
-
-    .footer-links {
-      display: grid;
-      gap: 10px;
-    }
-
-    .footer-links a {
-      color: rgba(255,255,255,.55);
-      font-size: 11px;
-      transition: .2s ease;
-    }
-
-    .footer-links a:hover {
-      color: white;
-      transform: translateX(3px);
-    }
-
-    .socials {
-      display: flex;
-      gap: 8px;
-    }
-
-    .social {
-      width: 37px;
-      height: 37px;
-      border-radius: 50%;
-      border: 1px solid var(--dark-line);
-      display: grid;
-      place-items: center;
-      color: rgba(255,255,255,.55);
-      transition: .25s ease;
-    }
-
-    .social:hover {
-      color: var(--navy);
-      background: var(--gold);
-      border-color: var(--gold);
-      transform: translateY(-3px);
-    }
-
-    .footer-bottom {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-      padding-top: 22px;
-      color: rgba(255,255,255,.32);
-      font-size: 9px;
-    }
-
-    /* modal */
-    .modal-backdrop {
-      position: fixed;
-      z-index: 120;
-      inset: 0;
-      background: rgba(2,7,16,.78);
-      backdrop-filter: blur(12px);
-      display: grid;
-      place-items: center;
-      padding: 20px;
-    }
-
-    .modal {
-      width: min(920px, 100%);
-      max-height: min(850px, 92vh);
-      overflow: hidden;
-      background: white;
-      border-radius: 25px;
-      display: grid;
-      grid-template-columns: .9fr 1.1fr;
-      box-shadow: 0 40px 100px rgba(0,0,0,.35);
-    }
-
-    .modal-image {
-      min-height: 580px;
-      position: relative;
-    }
-
-    .modal-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .modal-close {
-      position: absolute;
-      z-index: 3;
-      top: 14px;
-      right: 14px;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      background: rgba(255,255,255,.92);
-      color: var(--navy);
-    }
-
-    .modal-content {
-      padding: 45px;
-      overflow-y: auto;
-    }
-
-    .modal-content h2 {
-      font-family: "Playfair Display", serif;
-      font-size: 43px;
-      line-height: 1;
-      margin: 10px 0 15px;
-    }
-
-    .modal-price {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--gold);
-      margin: 15px 0 25px;
-    }
-
-    .modal-description {
-      color: var(--muted);
-      line-height: 1.9;
-      font-size: 13px;
-    }
-
-    .modal-meta {
-      display: grid;
-      grid-template-columns: repeat(3,1fr);
-      gap: 8px;
-      margin: 30px 0;
-    }
-
-    .modal-meta-item {
-      padding: 15px 8px;
-      border-radius: 13px;
-      background: var(--cream);
-      text-align: center;
-      color: var(--navy);
-    }
-
-    .modal-meta-item svg {
-      color: var(--gold);
-      margin-bottom: 5px;
-    }
-
-    .modal-meta-item span {
-      display: block;
-      font-size: 9px;
-      font-weight: 800;
-    }
-
-    /* floating */
-    .floating-actions {
-      position: fixed;
-      z-index: 80;
-      right: 20px;
-      bottom: 20px;
-      display: grid;
-      gap: 10px;
-    }
-
-    .float-btn {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      box-shadow: 0 15px 35px rgba(0,0,0,.18);
-      transition: .3s ease;
-    }
-
-    .float-btn:hover {
-      transform: translateY(-4px) scale(1.04);
-    }
-
-    .whatsapp {
-      color: white;
-      background: #1fa968;
-    }
-
-    .top-btn {
-      background: var(--navy);
-      color: white;
-    }
-
-    /* toast */
-    .toast {
-      position: fixed;
-      z-index: 150;
-      left: 50%;
-      bottom: 25px;
-      transform: translateX(-50%);
-      background: var(--navy);
-      color: white;
-      padding: 13px 18px;
-      border-radius: 999px;
-      box-shadow: 0 15px 40px rgba(0,0,0,.2);
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      font-size: 11px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .toast svg {
-      color: var(--gold);
-    }
-
-    /* responsive */
-    @media (max-width: 1100px) {
-      .nav-links,
-      .nav-contact {
-        display: none;
-      }
-
-      .menu-btn {
-        display: flex;
-      }
-
-      .property-grid {
-        grid-template-columns: repeat(2, minmax(0,1fr));
-      }
-
-      .areas-grid {
-        grid-template-columns: repeat(3, minmax(0,1fr));
-      }
-
-      .area {
-        height: 350px;
-      }
-
-      .services-grid {
-        grid-template-columns: repeat(2,1fr);
-      }
-
-      .search-fields {
-        grid-template-columns: repeat(2,1fr);
-      }
-
-      .search-btn {
-        width: 100%;
-      }
-    }
-
-    @media (max-width: 900px) {
-      .section {
-        padding: 80px 0;
-      }
-
-      .split,
-      .contact-grid {
-        grid-template-columns: 1fr;
-        gap: 45px;
-      }
-
-      .image-stack {
-        min-height: 520px;
-        max-width: 650px;
-      }
-
-      .process-grid {
-        grid-template-columns: repeat(2,1fr);
-        gap: 0 25px;
-      }
-
-      .process-card:not(:last-child)::after {
-        display: none;
-      }
-
-      .footer-grid {
-        grid-template-columns: repeat(2,1fr);
-      }
-
-      .modal {
-        grid-template-columns: 1fr;
-        max-height: 90vh;
-        overflow-y: auto;
-      }
-
-      .modal-image {
-        min-height: 300px;
-        height: 300px;
-      }
-
-      .modal-content {
-        padding: 30px;
-      }
-    }
-
-    @media (max-width: 650px) {
-      .container,
-      .hero-content {
-        width: min(100% - 30px, 1180px);
-      }
-
-      .navbar {
-        padding: 13px 0;
-      }
-
-      .nav-inner {
-        width: calc(100% - 24px);
-      }
-
-      .brand {
-        min-width: 0;
-      }
-
-      .brand-mark {
-        width: 38px;
-        height: 38px;
-      }
-
-      .brand-text strong {
-        font-size: 14px;
-      }
-
-      .brand-text small {
-        font-size: 7px;
-      }
-
-      .hero {
-        min-height: 760px;
-        height: 100svh;
-      }
-
-      .hero-image {
-        background:
-          linear-gradient(90deg, rgba(4,10,22,.91), rgba(4,10,22,.55)),
-          linear-gradient(0deg, rgba(4,10,22,.65), transparent),
-          url("https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=85")
-          center/cover no-repeat;
-      }
-
-      .hero-content {
-        padding-top: 70px;
-      }
-
-      .hero-title {
-        font-size: clamp(48px, 15vw, 72px);
-      }
-
-      .hero-description {
-        font-size: 12px;
-        line-height: 1.75;
-        margin: 22px 0;
-      }
-
-      .hero-actions {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .hero-actions .btn {
-        width: 100%;
-      }
-
-      .hero-trust {
-        margin-top: 28px;
-        gap: 10px 18px;
-      }
-
-      .hero-trust span {
-        font-size: 8px;
-      }
-
-      .scroll-indicator {
-        display: none;
-      }
-
-      .search-wrap {
-        margin-top: -45px;
-      }
-
-      .search-panel {
-        padding: 13px;
-        border-radius: 19px;
-      }
-
-      .search-top {
-        padding: 1px 3px 11px;
-      }
-
-      .search-fields {
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }
-
-      .field select,
-      .search-btn {
-        min-height: 51px;
-      }
-
-      .marquee-item {
-        font-size: 15px;
-        padding: 14px 20px;
-      }
-
-      .stats {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .stat {
-        padding: 27px 16px;
-      }
-
-      .stat:nth-child(2) {
-        border-right: 0;
-      }
-
-      .stat:nth-child(3),
-      .stat:nth-child(4) {
-        border-top: 1px solid var(--line);
-      }
-
-      .section-title {
-        font-size: clamp(39px, 12vw, 55px);
-      }
-
-      .section-heading {
-        margin-bottom: 35px;
-      }
-
-      .section-description {
-        font-size: 12px;
-        line-height: 1.8;
-      }
-
-      .property-grid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-      }
-
-      .property-image {
-        height: 245px;
-      }
-
-      .property-body {
-        padding: 18px;
-      }
-
-      .property-title {
-        font-size: 21px;
-      }
-
-      .image-stack {
-        min-height: 430px;
-      }
-
-      .image-main {
-        width: 82%;
-        height: 370px;
-      }
-
-      .image-small {
-        height: 175px;
-        width: 46%;
-        border-width: 7px;
-      }
-
-      .floating-badge {
-        width: 90px;
-        height: 90px;
-        font-size: 7px;
-        top: 15px;
-      }
-
-      .services-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .service {
-        min-height: 245px;
-        padding: 28px 22px;
-      }
-
-      .areas-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-
-      .area {
-        height: 280px;
-        border-radius: 15px;
-      }
-
-      .area:last-child {
-        grid-column: 1 / -1;
-        height: 250px;
-      }
-
-      .area-content {
-        left: 15px;
-        right: 15px;
-        bottom: 15px;
-      }
-
-      .area-content h3 {
-        font-size: 25px;
-      }
-
-      .process-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .process-card {
-        padding: 24px 0;
-      }
-
-      .cta {
-        padding: 42px 24px;
-        border-radius: 22px;
-      }
-
-      .cta h2 {
-        font-size: 43px;
-      }
-
-      .contact-form {
-        padding: 18px;
-        border-radius: 18px;
-      }
-
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .form-field.full {
-        grid-column: auto;
-      }
-
-      .footer {
-        padding-top: 55px;
-      }
-
-      .footer-grid {
-        grid-template-columns: 1fr;
-        gap: 35px;
-      }
-
-      .footer-bottom {
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .modal-backdrop {
-        padding: 10px;
-        align-items: end;
-      }
-
-      .modal {
-        border-radius: 22px 22px 15px 15px;
-        max-height: 94vh;
-      }
-
-      .modal-image {
-        min-height: 230px;
-        height: 230px;
-      }
-
-      .modal-content {
-        padding: 24px 20px 30px;
-      }
-
-      .modal-content h2 {
-        font-size: 34px;
-      }
-
-      .modal-meta {
-        grid-template-columns: repeat(3,1fr);
-      }
-
-      .floating-actions {
-        right: 14px;
-        bottom: 14px;
-      }
-
-      .float-btn {
-        width: 47px;
-        height: 47px;
-      }
-
-      .toast {
-        width: calc(100% - 30px);
-        justify-content: center;
-        white-space: normal;
-        text-align: center;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-        transition-duration: .01ms !important;
-      }
-    }
-  `}</style>
-);
+const AREAS = [
+  {
+    id: "f6",
+    name: "F-6",
+    description:
+      "An established address for old-money quiet and mature, tree-lined streets.",
+    image:
+      "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=85",
+  },
+
+  {
+    id: "f7",
+    name: "F-7",
+    description:
+      "Islamabad's most requested postcode, close to markets, schools and diplomatic enclaves.",
+    image:
+      "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=85",
+  },
+
+  {
+    id: "f8",
+    name: "F-8",
+    description:
+      "A broad mix of family homes and rentals, five minutes from the Margalla trails.",
+    image:
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=85",
+  },
+
+  {
+    id: "e7",
+    name: "E-7",
+    description:
+      "Exclusive, low-density plots favoured by families who want space and privacy.",
+    image:
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=85",
+  },
+
+  {
+    id: "blue-area",
+    name: "Blue Area",
+    description:
+      "Islamabad's commercial spine, where every serious investor wants a floor.",
+    image:
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=85",
+  },
+];
+
+/* ============================================================
+   SERVICES
+============================================================ */
+
+const SERVICES = [
+  {
+    icon: HomeIcon,
+    title: "Property Sales",
+    description:
+      "Professional marketing and negotiation support to sell residential and commercial property at the right price.",
+  },
+
+  {
+    icon: KeyRound,
+    title: "Property Purchase",
+    description:
+      "A shortlist built around your budget and priorities, with honest guidance at every viewing.",
+  },
+
+  {
+    icon: Building2,
+    title: "Rentals",
+    description:
+      "Tenant screening, paperwork and ongoing support for landlords, and a smoother search for tenants.",
+  },
+
+  {
+    icon: TrendingUp,
+    title: "Investment Consultancy",
+    description:
+      "Sector-by-sector insight to help you place capital where Islamabad's growth is heading next.",
+  },
+];
+
+/* ============================================================
+   WHY
+============================================================ */
+
+const WHY_POINTS = [
+  "Deep, current knowledge of the Islamabad market",
+  "Specialists in F-6, F-7, F-8, E-7 and Blue Area",
+  "Consultancy built around your priorities, not a script",
+  "Residential and commercial expertise under one roof",
+  "Support that continues after the paperwork is signed",
+  "An investment-first lens on every recommendation",
+];
+
+/* ============================================================
+   PROCESS
+============================================================ */
+
+const PROCESS_STEPS = [
+  {
+    number: "01",
+    title: "Tell us what you need",
+    description:
+      "Share what you're looking to buy, sell, rent or invest in, and where.",
+  },
+
+  {
+    number: "02",
+    title: "Explore suitable properties",
+    description:
+      "We put together a shortlist of properties that genuinely match your brief.",
+  },
+
+  {
+    number: "03",
+    title: "Get expert guidance",
+    description:
+      "Our consultants walk you through options, locations and next steps.",
+  },
+
+  {
+    number: "04",
+    title: "Make your move",
+    description:
+      "Proceed with confidence, supported at every stage of the transaction.",
+  },
+];
+
+/* ============================================================
+   STATS
+============================================================ */
+
+const STATS = [
+  {
+    value: 12,
+    suffix: "+",
+    label: "Years active in Islamabad's property market",
+  },
+
+  {
+    value: 480,
+    suffix: "+",
+    label: "Properties sold, let or transacted",
+  },
+
+  {
+    value: 5,
+    suffix: "",
+    label: "Prime sectors covered end to end",
+  },
+
+  {
+    value: 96,
+    suffix: "%",
+    label: "Clients who would recommend us",
+  },
+];
+
+/* ============================================================
+   TESTIMONIALS
+============================================================ */
+
+const TESTIMONIALS = [
+  {
+    name: "F-7 Homeowner",
+    context: "Purchased a 1 Kanal residence",
+    quote:
+      "We had looked at a dozen agents before Prime Property. What stood out was that they said no to two houses that didn't fit our budget instead of just pushing a sale.",
+  },
+
+  {
+    name: "Blue Area Investor",
+    context: "Acquired a commercial floor",
+    quote:
+      "Their read on which floors in Blue Area were undervalued turned out to be right. The rental yield has outperformed what we modelled going in.",
+  },
+
+  {
+    name: "F-8 Tenant",
+    context: "Rented a 3-bed apartment",
+    quote:
+      "Renting in Islamabad can be slow and full of surprises. They handled the paperwork, negotiated the terms, and moved us in within two weeks.",
+  },
+
+  {
+    name: "E-7 Homeowner",
+    context: "Sold a family villa",
+    quote:
+      "The marketing they put together for our villa was genuinely well done. We had a serious offer within the first month of listing.",
+  },
+];
+
+const INTEREST_OPTIONS = [
+  "Buying",
+  "Selling",
+  "Renting",
+  "Investment",
+  "Commercial",
+  "General inquiry",
+];
 
 /* ============================================================
    HELPERS
 ============================================================ */
 
-const reveal = {
-  hidden: { opacity: 0, y: 35 },
+function scrollToId(id) {
+  const element = document.getElementById(id);
+
+  if (element) {
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+}
+
+function useScrollFlag(threshold) {
+  const [flag, setFlag] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setFlag(window.scrollY > threshold);
+    };
+
+    onScroll();
+
+    window.addEventListener("scroll", onScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [threshold]);
+
+  return flag;
+}
+
+/* ============================================================
+   REVEAL
+============================================================ */
+
+const fadeUp = {
+  hidden: {
+    opacity: 0,
+    y: 28,
+  },
+
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.7,
-      ease: [0.2, 0.7, 0.2, 1],
+      duration: 0.65,
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 };
 
-function Reveal({ children, delay = 0, className = "" }) {
+function Reveal({
+  as = "div",
+  className,
+  children,
+  delay = 0,
+  ...rest
+}) {
+  const Comp = motion[as] || motion.div;
+
   return (
-    <motion.div
+    <Comp
       className={className}
-      variants={reveal}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ delay }}
+      viewport={{
+        once: true,
+        amount: 0.15,
+      }}
+      variants={fadeUp}
+      transition={{
+        duration: 0.65,
+        ease: [0.22, 1, 0.36, 1],
+        delay,
+      }}
+      {...rest}
     >
       {children}
-    </motion.div>
+    </Comp>
   );
-}
-
-function useScrollFlag() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handle = () => setScrolled(window.scrollY > 40);
-    handle();
-    window.addEventListener("scroll", handle, { passive: true });
-    return () => window.removeEventListener("scroll", handle);
-  }, []);
-
-  return scrolled;
-}
-
-function scrollToId(id) {
-  document.getElementById(id)?.scrollIntoView({
-    behavior: "smooth",
-    block: "start",
-  });
 }
 
 /* ============================================================
    COUNT UP
 ============================================================ */
 
-function CountUp({ value, suffix = "" }) {
-  const [count, setCount] = useState(0);
+function CountUp({
+  value,
+  suffix = "",
+  duration = 1.6,
+}) {
+  const [display, setDisplay] = useState(0);
+  const started = useRef(false);
+  const reduceMotion = useReducedMotion();
 
-  useEffect(() => {
-    let start;
-    let frame;
+  const start = useCallback(() => {
+    if (started.current) return;
 
-    const duration = 1500;
+    started.current = true;
 
-    const animate = (time) => {
-      if (!start) start = time;
-      const progress = Math.min((time - start) / duration, 1);
+    if (reduceMotion) {
+      setDisplay(value);
+      return;
+    }
+
+    const startTime = performance.now();
+
+    const tick = (now) => {
+      const progress = Math.min(
+        (now - startTime) / (duration * 1000),
+        1
+      );
+
       const eased = 1 - Math.pow(1 - progress, 3);
 
-      setCount(Math.round(value * eased));
+      setDisplay(Math.round(eased * value));
 
       if (progress < 1) {
-        frame = requestAnimationFrame(animate);
+        requestAnimationFrame(tick);
       }
     };
 
-    frame = requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(frame);
-  }, [value]);
+    requestAnimationFrame(tick);
+  }, [value, duration, reduceMotion]);
 
   return (
-    <>
-      {count}
+    <motion.span
+      onViewportEnter={start}
+      viewport={{
+        once: true,
+        amount: 0.5,
+      }}
+    >
+      {display}
       {suffix}
-    </>
+    </motion.span>
+  );
+}
+
+/* ============================================================
+   GLOBAL STYLES
+============================================================ */
+
+function GlobalStyles() {
+  return (
+    <style>{`
+      @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap");
+
+      :root {
+        --navy: #07111f;
+        --navy-2: #0d1c30;
+        --navy-3: #101f34;
+
+        --gold: #c6a15b;
+        --gold-light: #e3c78f;
+        --gold-dark: #8a6b34;
+
+        --ivory: #f6f2e9;
+        --white: #ffffff;
+
+        --text: #18202d;
+        --text-light: #6b7484;
+        --text-muted: #929aa7;
+
+        --border: rgba(7, 17, 31, 0.11);
+
+        --container: 1240px;
+
+        --font-display: "Playfair Display", serif;
+        --font-body: "Manrope", sans-serif;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      body {
+        margin: 0;
+        background: var(--white);
+      }
+
+      body,
+      button,
+      input,
+      select,
+      textarea {
+        font-family: var(--font-body);
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      ul {
+        list-style: none;
+      }
+
+      ::selection {
+        background: var(--gold);
+        color: white;
+      }
+
+      .pp-root {
+        position: relative;
+        min-height: 100vh;
+        overflow-x: clip;
+        color: var(--text);
+        background: var(--white);
+        line-height: 1.6;
+      }
+
+      .pp-root main {
+        position: relative;
+        z-index: 1;
+      }
+
+      .container {
+        width: min(
+          calc(100% - 48px),
+          var(--container)
+        );
+        margin-inline: auto;
+      }
+
+      .section {
+        position: relative;
+        padding: 120px 0;
+        scroll-margin-top: 90px;
+      }
+
+      .section:not(.section--navy)::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: min(
+          calc(100% - 80px),
+          1180px
+        );
+        height: 1px;
+        transform: translateX(-50%);
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(198,161,91,.32),
+          transparent
+        );
+      }
+
+      .section--ivory {
+        background:
+          linear-gradient(
+            180deg,
+            #f8f5ee 0%,
+            #f2ede2 100%
+          );
+      }
+
+      .section--navy {
+        color: white;
+        background:
+          radial-gradient(
+            circle at 85% 15%,
+            rgba(198,161,91,.11),
+            transparent 26%
+          ),
+          radial-gradient(
+            circle at 10% 90%,
+            rgba(198,161,91,.06),
+            transparent 25%
+          ),
+          linear-gradient(
+            145deg,
+            #06101d,
+            #0b1a2d 55%,
+            #07111f
+          );
+      }
+
+      .section--navy > .container {
+        position: relative;
+        z-index: 2;
+      }
+
+      /* ======================================================
+         GRAIN
+      ====================================================== */
+
+      .grain {
+        position: fixed;
+        inset: 0;
+        z-index: 5;
+        pointer-events: none;
+        opacity: .025;
+        mix-blend-mode: overlay;
+        background-image:
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+
+      /* ======================================================
+         SCROLL BAR
+      ====================================================== */
+
+      .scroll-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        z-index: 5000;
+        transform-origin: left center;
+        background:
+          linear-gradient(
+            90deg,
+            var(--gold-dark),
+            var(--gold),
+            var(--gold-light)
+          );
+      }
+
+      /* ======================================================
+         TYPOGRAPHY
+      ====================================================== */
+
+      .kicker {
+        margin-bottom: 15px;
+        color: var(--gold-dark);
+        font-family: var(--font-display);
+        font-size: 17px;
+        font-style: italic;
+      }
+
+      .section--navy .kicker {
+        color: var(--gold-light);
+      }
+
+      .heading {
+        max-width: 760px;
+        font-family: var(--font-display);
+        font-size: clamp(34px, 4.2vw, 54px);
+        font-weight: 500;
+        line-height: 1.08;
+        letter-spacing: -.025em;
+      }
+
+      .lede {
+        max-width: 580px;
+        margin-top: 18px;
+        color: var(--text-light);
+        font-size: 15px;
+        line-height: 1.85;
+      }
+
+      .section--navy .lede {
+        color: rgba(255,255,255,.64);
+      }
+
+      /* ======================================================
+         BUTTONS
+      ====================================================== */
+
+      .btn {
+        position: relative;
+        display: inline-flex;
+        min-height: 52px;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 0 25px;
+
+        border: 1px solid transparent;
+
+        color: white;
+
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .025em;
+
+        overflow: hidden;
+        white-space: nowrap;
+
+        transition:
+          transform .25s ease,
+          border-color .25s ease,
+          color .25s ease,
+          background .25s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .btn::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        transform: translateX(-105%);
+        transition: transform .4s ease;
+      }
+
+      .btn:hover::before {
+        transform: translateX(0);
+      }
+
+      .btn > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .btn--gold {
+        background: var(--gold);
+      }
+
+      .btn--gold::before {
+        background: var(--gold-dark);
+      }
+
+      .btn--outline {
+        border-color: rgba(255,255,255,.45);
+        background: transparent;
+      }
+
+      .btn--outline::before {
+        background: white;
+      }
+
+      .btn--outline:hover {
+        color: var(--navy);
+        border-color: white;
+      }
+
+      .btn--outline-dark {
+        color: var(--navy);
+        border-color: var(--navy);
+        background: transparent;
+      }
+
+      .btn--outline-dark::before {
+        background: var(--navy);
+      }
+
+      .btn--outline-dark:hover {
+        color: white;
+      }
+
+      .btn--small {
+        min-height: 42px;
+        padding: 0 18px;
+        font-size: 10.5px;
+      }
+
+      /* ======================================================
+         NAVBAR
+      ====================================================== */
+
+      .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 3000;
+
+        height: 88px;
+
+        color: white;
+
+        transition:
+          height .3s ease,
+          background .3s ease,
+          box-shadow .3s ease;
+      }
+
+      .navbar--scrolled {
+        height: 72px;
+        background: rgba(5,13,24,.9);
+        backdrop-filter: blur(18px);
+        box-shadow:
+          0 12px 40px rgba(0,0,0,.2);
+      }
+
+      .navbar__inner {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 30px;
+      }
+
+      .navbar__brand {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 11px;
+      }
+
+      .navbar__brand-mark {
+        width: 42px;
+        height: 42px;
+
+        display: grid;
+        place-items: center;
+
+        flex: 0 0 auto;
+
+        border: 1px solid var(--gold);
+
+        color: var(--gold);
+
+        font-family: var(--font-display);
+        font-size: 17px;
+      }
+
+      .navbar__brand-name {
+        min-width: 0;
+        color: white;
+
+        font-family: var(--font-display);
+        font-size: 16px;
+        line-height: 1.1;
+      }
+
+      .navbar__brand-name span {
+        display: block;
+        margin-top: 3px;
+
+        color: var(--gold-light);
+
+        font-family: var(--font-body);
+        font-size: 9.5px;
+        font-weight: 600;
+        letter-spacing: .07em;
+      }
+
+      .navbar__links {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+      }
+
+      .navbar__links a {
+        position: relative;
+        color: rgba(255,255,255,.82);
+        font-size: 11.5px;
+        font-weight: 700;
+        transition: color .25s ease;
+      }
+
+      .navbar__links a::after {
+        content: "";
+        position: absolute;
+        bottom: -7px;
+        left: 0;
+
+        width: 0;
+        height: 1px;
+
+        background: var(--gold);
+
+        transition: width .3s ease;
+      }
+
+      .navbar__links a:hover {
+        color: var(--gold-light);
+      }
+
+      .navbar__links a:hover::after {
+        width: 100%;
+      }
+
+      .navbar__actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .navbar__hamburger {
+        width: 44px;
+        height: 44px;
+
+        display: none;
+        align-items: center;
+        justify-content: center;
+
+        border: 1px solid rgba(255,255,255,.18);
+
+        color: white;
+        background: rgba(255,255,255,.04);
+      }
+
+      /* ======================================================
+         MOBILE MENU
+      ====================================================== */
+
+      .mobile-menu {
+        position: fixed;
+        inset: 0;
+        z-index: 4500;
+
+        display: flex;
+        flex-direction: column;
+
+        padding:
+          max(20px, env(safe-area-inset-top))
+          24px
+          max(28px, env(safe-area-inset-bottom));
+
+        color: white;
+        background:
+          radial-gradient(
+            circle at 85% 10%,
+            rgba(198,161,91,.12),
+            transparent 25%
+          ),
+          var(--navy);
+
+        overflow-y: auto;
+      }
+
+      .mobile-menu__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .mobile-menu__close {
+        width: 44px;
+        height: 44px;
+
+        display: grid;
+        place-items: center;
+
+        border: 1px solid rgba(255,255,255,.16);
+
+        color: white;
+        background: rgba(255,255,255,.04);
+      }
+
+      .mobile-menu__links {
+        display: flex;
+        flex-direction: column;
+
+        margin-top: 48px;
+      }
+
+      .mobile-menu__links a:not(.btn) {
+        padding: 15px 0;
+
+        border-bottom: 1px solid rgba(255,255,255,.08);
+
+        color: white;
+
+        font-family: var(--font-display);
+        font-size: clamp(26px,8vw,38px);
+        line-height: 1.1;
+      }
+
+      .mobile-menu__cta {
+        margin-top: 28px;
+        align-self: flex-start;
+      }
+
+      /* ======================================================
+         HERO
+      ====================================================== */
+
+      .hero {
+        position: relative;
+
+        min-height: max(
+          760px,
+          100svh
+        );
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        padding:
+          130px 0
+          90px;
+
+        color: white;
+
+        overflow: hidden;
+      }
+
+      .hero__image {
+        position: absolute;
+        inset: -7%;
+
+        background:
+          url("https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=2200&q=90")
+          center / cover no-repeat;
+
+        will-change: transform;
+      }
+
+      .hero__overlay {
+        position: absolute;
+        inset: 0;
+
+        background:
+          linear-gradient(
+            90deg,
+            rgba(2,7,14,.96) 0%,
+            rgba(4,10,19,.78) 42%,
+            rgba(4,10,19,.35) 100%
+          ),
+          linear-gradient(
+            0deg,
+            rgba(2,6,12,.8),
+            transparent 55%
+          );
+      }
+
+      .hero__glow {
+        position: absolute;
+
+        width: 520px;
+        height: 520px;
+
+        border-radius: 50%;
+
+        pointer-events: none;
+
+        background:
+          radial-gradient(
+            circle,
+            rgba(198,161,91,.18),
+            transparent 68%
+          );
+
+        transform: translate(-50%,-50%);
+      }
+
+      .hero__content {
+        position: relative;
+        z-index: 2;
+
+        width: min(
+          calc(100% - 48px),
+          var(--container)
+        );
+
+        margin-inline: auto;
+      }
+
+      .hero__kicker {
+        margin-bottom: 20px;
+
+        color: var(--gold-light);
+
+        font-family: var(--font-display);
+        font-size: clamp(16px,2vw,19px);
+        font-style: italic;
+      }
+
+      .hero__heading {
+        max-width: 850px;
+
+        margin-bottom: 24px;
+
+        font-family: var(--font-display);
+        font-size: clamp(
+          46px,
+          7vw,
+          88px
+        );
+
+        font-weight: 500;
+        line-height: .98;
+
+        letter-spacing: -.04em;
+
+        text-shadow:
+          0 10px 35px rgba(0,0,0,.2);
+      }
+
+      .hero__sub {
+        max-width: 600px;
+
+        margin-bottom: 32px;
+
+        color: rgba(255,255,255,.74);
+
+        font-size: 15.5px;
+        line-height: 1.85;
+      }
+
+      .hero__buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .hero__trust {
+        display: flex;
+        flex-wrap: wrap;
+
+        gap: 20px;
+
+        margin-top: 40px;
+
+        color: rgba(255,255,255,.55);
+
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .04em;
+      }
+
+      .hero__trust span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .hero__trust span::before {
+        content: "";
+        width: 4px;
+        height: 4px;
+
+        border-radius: 50%;
+
+        background: var(--gold);
+      }
+
+      /* ======================================================
+         SEARCH
+      ====================================================== */
+
+      .hero-search {
+        position: relative;
+        z-index: 5;
+
+        width: min(
+          calc(100% - 48px),
+          var(--container)
+        );
+
+        margin: 48px auto 0;
+      }
+
+      .hero-search__panel {
+        display: grid;
+        grid-template-columns:
+          1fr
+          1fr
+          1fr
+          180px;
+
+        overflow: hidden;
+
+        border: 1px solid rgba(255,255,255,.16);
+        border-radius: 4px;
+
+        background: white;
+
+        box-shadow:
+          0 30px 80px rgba(0,0,0,.35);
+      }
+
+      .hero-search__field {
+        min-width: 0;
+
+        padding: 16px 20px;
+
+        border-right: 1px solid var(--border);
+
+        background: rgba(255,255,255,.98);
+      }
+
+      .hero-search__field label {
+        display: block;
+
+        margin-bottom: 6px;
+
+        color: var(--text-muted);
+
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+      }
+
+      .hero-search__field select {
+        width: 100%;
+
+        border: 0;
+        outline: 0;
+
+        color: var(--navy);
+        background: transparent;
+
+        font-size: 12.5px;
+        font-weight: 800;
+
+        cursor: pointer;
+      }
+
+      .hero-search__submit {
+        min-width: 0;
+        border-radius: 0;
+      }
+
+      /* ======================================================
+         HERO SCROLL
+      ====================================================== */
+
+      .hero__scroll {
+        position: absolute;
+        bottom: 24px;
+        left: 50%;
+
+        z-index: 3;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 7px;
+
+        transform: translateX(-50%);
+
+        color: rgba(255,255,255,.55);
+
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .16em;
+      }
+
+      .hero__scroll-line {
+        width: 1px;
+        height: 34px;
+
+        background:
+          linear-gradient(
+            to bottom,
+            rgba(255,255,255,.7),
+            transparent
+          );
+      }
+
+      /* ======================================================
+         MARQUEE
+      ====================================================== */
+
+      .marquee {
+        position: relative;
+
+        overflow: hidden;
+
+        padding: 18px 0;
+
+        border-top: 1px solid rgba(198,161,91,.2);
+        border-bottom: 1px solid rgba(198,161,91,.2);
+
+        background: var(--navy);
+      }
+
+      .marquee__track {
+        display: flex;
+        width: max-content;
+
+        animation: marquee 30s linear infinite;
+      }
+
+      .marquee:hover .marquee__track {
+        animation-play-state: paused;
+      }
+
+      .marquee__item {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+
+        padding-right: 20px;
+
+        color: rgba(255,255,255,.76);
+
+        font-family: var(--font-display);
+        font-size: 20px;
+        font-style: italic;
+
+        white-space: nowrap;
+      }
+
+      .marquee__item svg {
+        color: var(--gold);
+      }
+
+      @keyframes marquee {
+        from {
+          transform: translateX(0);
+        }
+
+        to {
+          transform: translateX(-50%);
+        }
+      }
+
+      /* ======================================================
+         STATS
+      ====================================================== */
+
+      .stats {
+        position: relative;
+
+        padding: 68px 0;
+
+        background: var(--ivory);
+      }
+
+      .stats__grid {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+
+        overflow: hidden;
+
+        border: 1px solid var(--border);
+        border-radius: 5px;
+
+        box-shadow:
+          0 14px 45px rgba(7,17,31,.05);
+      }
+
+      .stats__card {
+        padding: 34px 28px;
+
+        border-right: 1px solid var(--border);
+
+        background: var(--ivory);
+
+        transition:
+          transform .3s ease,
+          background .3s ease;
+      }
+
+      .stats__card:last-child {
+        border-right: 0;
+      }
+
+      .stats__card:hover {
+        transform: translateY(-3px);
+        background: #fffdf8;
+      }
+
+      .stats__value {
+        display: block;
+
+        color: var(--navy);
+
+        font-family: var(--font-display);
+        font-size: clamp(38px,4vw,54px);
+        font-weight: 500;
+        line-height: 1;
+      }
+
+      .stats__label {
+        max-width: 220px;
+
+        margin-top: 11px;
+
+        color: var(--text-light);
+
+        font-size: 12.5px;
+        line-height: 1.6;
+      }
+
+      .stats__note {
+        margin-top: 20px;
+
+        color: var(--text-muted);
+
+        font-size: 10.5px;
+      }
+
+      /* ======================================================
+         TRUST
+      ====================================================== */
+
+      .trust__grid {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+
+        margin-top: 52px;
+
+        overflow: hidden;
+
+        border: 1px solid var(--border);
+        border-radius: 5px;
+      }
+
+      .trust__card {
+        min-height: 205px;
+
+        padding: 34px 26px;
+
+        border-right: 1px solid var(--border);
+
+        background: white;
+
+        transition:
+          transform .3s ease,
+          box-shadow .3s ease;
+      }
+
+      .trust__card:last-child {
+        border-right: 0;
+      }
+
+      .trust__card:hover {
+        position: relative;
+        z-index: 1;
+
+        transform: translateY(-6px);
+
+        box-shadow:
+          0 25px 50px rgba(7,17,31,.1);
+      }
+
+      .trust__icon {
+        margin-bottom: 20px;
+        color: var(--gold);
+      }
+
+      .trust__card h3 {
+        margin-bottom: 7px;
+
+        font-family: var(--font-display);
+        font-size: 20px;
+      }
+
+      .trust__card p {
+        color: var(--text-light);
+        font-size: 12px;
+      }
+
+      /* ======================================================
+         SECTION INTRO
+      ====================================================== */
+
+      .section__intro {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 40px;
+
+        margin-bottom: 50px;
+      }
+
+      .section__note {
+        max-width: 340px;
+
+        margin-top: 14px;
+
+        color: var(--text-muted);
+
+        font-size: 11px;
+        line-height: 1.7;
+      }
+
+      /* ======================================================
+         PROPERTIES
+      ====================================================== */
+
+      .property-grid {
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: 28px;
+      }
+
+      .property-card {
+        overflow: hidden;
+
+        border: 1px solid var(--border);
+        border-radius: 6px;
+
+        background: white;
+
+        box-shadow:
+          0 8px 25px rgba(7,17,31,.045);
+
+        transition:
+          transform .4s ease,
+          box-shadow .4s ease;
+      }
+
+      .property-card:hover {
+        transform: translateY(-7px);
+
+        box-shadow:
+          0 28px 65px rgba(7,17,31,.14);
+      }
+
+      .property-card__media {
+        position: relative;
+
+        height: 280px;
+
+        overflow: hidden;
+
+        background: #e8e5df;
+      }
+
+      .property-card__media img {
+        width: 100%;
+        height: 100%;
+
+        object-fit: cover;
+
+        transition:
+          transform .7s cubic-bezier(.22,1,.36,1);
+      }
+
+      .property-card:hover
+      .property-card__media img {
+        transform: scale(1.08);
+      }
+
+      .property-card__media::after {
+        content: "";
+
+        position: absolute;
+        inset: 0;
+
+        pointer-events: none;
+
+        background:
+          linear-gradient(
+            to bottom,
+            transparent 55%,
+            rgba(3,8,14,.22)
+          );
+      }
+
+      .property-card__badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+
+        z-index: 2;
+
+        padding: 7px 11px;
+
+        border: 1px solid rgba(255,255,255,.18);
+        border-radius: 999px;
+
+        color: white;
+        background: rgba(7,17,31,.76);
+
+        backdrop-filter: blur(8px);
+
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .05em;
+      }
+
+      .property-card__body {
+        padding: 23px;
+      }
+
+      .property-card__top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+
+        margin-bottom: 9px;
+      }
+
+      .property-card__top h3 {
+        min-width: 0;
+
+        color: var(--navy);
+
+        font-family: var(--font-display);
+        font-size: 20px;
+        line-height: 1.2;
+      }
+
+      .property-card__price {
+        flex: 0 0 auto;
+
+        color: var(--gold-dark);
+
+        font-size: 12.5px;
+        font-weight: 800;
+
+        text-align: right;
+      }
+
+      .property-card__location {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        margin-bottom: 15px;
+
+        color: var(--text-light);
+
+        font-size: 12px;
+      }
+
+      .property-card__location svg {
+        flex: 0 0 auto;
+        color: var(--gold);
+      }
+
+      .property-card__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 15px;
+
+        padding-top: 15px;
+
+        border-top: 1px solid var(--border);
+
+        color: var(--text-light);
+
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .property-card__meta span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .property-card__meta svg {
+        color: var(--gold);
+      }
+
+      .property-card__actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        margin-top: 18px;
+      }
+
+      .property-card__view {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+
+        padding: 7px 0;
+
+        color: var(--navy);
+
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .property-card__arrow {
+        transition: transform .25s ease;
+      }
+
+      .property-card__view:hover
+      .property-card__arrow {
+        transform: translate(3px,-3px);
+      }
+
+      .property-card__whatsapp {
+        width: 38px;
+        height: 38px;
+
+        display: grid;
+        place-items: center;
+
+        border: 1px solid var(--border);
+        border-radius: 50%;
+
+        color: var(--navy);
+
+        transition: all .25s ease;
+      }
+
+      .property-card__whatsapp:hover {
+        color: white;
+        border-color: #25d366;
+        background: #25d366;
+        transform: translateY(-2px);
+      }
+
+      .property-grid__empty {
+        grid-column: 1/-1;
+
+        padding: 70px 25px;
+
+        text-align: center;
+
+        border: 1px solid var(--border);
+
+        color: var(--text-light);
+        background: var(--ivory);
+      }
+
+      .property-grid__count {
+        margin-top: 22px;
+
+        color: var(--text-muted);
+
+        font-size: 11px;
+      }
+
+      /* ======================================================
+         MODAL
+      ====================================================== */
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 6000;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 20px;
+
+        overflow-y: auto;
+
+        background: rgba(3,8,14,.84);
+
+        backdrop-filter: blur(10px);
+      }
+
+      .modal {
+        position: relative;
+
+        width: min(950px,100%);
+
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+
+        overflow: hidden;
+
+        border-radius: 6px;
+
+        background: white;
+
+        box-shadow:
+          0 40px 100px rgba(0,0,0,.45);
+      }
+
+      .modal__close {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+
+        z-index: 4;
+
+        width: 42px;
+        height: 42px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 50%;
+
+        color: var(--navy);
+        background: white;
+
+        box-shadow:
+          0 8px 25px rgba(0,0,0,.18);
+      }
+
+      .modal__media {
+        min-height: 520px;
+      }
+
+      .modal__media img {
+        width: 100%;
+        height: 100%;
+        min-height: 520px;
+
+        object-fit: cover;
+      }
+
+      .modal__body {
+        padding: 44px;
+        overflow-y: auto;
+        max-height: 85vh;
+      }
+
+      .modal__badge {
+        display: inline-block;
+
+        margin-bottom: 17px;
+        padding: 6px 11px;
+
+        color: var(--gold-dark);
+        background: var(--ivory);
+
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .06em;
+      }
+
+      .modal__body h3 {
+        margin-bottom: 9px;
+
+        color: var(--navy);
+
+        font-family: var(--font-display);
+        font-size: 32px;
+        line-height: 1.15;
+      }
+
+      .modal__location {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        margin-bottom: 14px;
+
+        color: var(--text-light);
+
+        font-size: 12px;
+      }
+
+      .modal__price {
+        margin-bottom: 18px;
+
+        color: var(--gold-dark);
+
+        font-family: var(--font-display);
+        font-size: 24px;
+      }
+
+      .modal__description {
+        margin-bottom: 22px;
+
+        color: var(--text-light);
+
+        font-size: 13.5px;
+        line-height: 1.8;
+      }
+
+      .modal__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+
+        margin-bottom: 22px;
+        padding: 17px 0;
+
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+
+        color: var(--text);
+
+        font-size: 11.5px;
+        font-weight: 700;
+      }
+
+      .modal__meta span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .modal__meta svg {
+        color: var(--gold);
+      }
+
+      .modal__features h4 {
+        margin-bottom: 11px;
+
+        font-family: var(--font-display);
+        font-size: 17px;
+      }
+
+      .modal__features ul {
+        display: grid;
+        gap: 8px;
+
+        margin-bottom: 25px;
+      }
+
+      .modal__features li {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+
+        color: var(--text-light);
+
+        font-size: 12px;
+      }
+
+      .modal__features li svg {
+        flex: 0 0 auto;
+        margin-top: 2px;
+
+        color: var(--gold);
+      }
+
+      .modal__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      /* ======================================================
+         SERVICES
+      ====================================================== */
+
+      .services__grid {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+
+        margin-top: 52px;
+
+        gap: 1px;
+
+        overflow: hidden;
+
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: 5px;
+      }
+
+      .services__card {
+        min-height: 245px;
+
+        padding: 36px 27px;
+
+        background:
+          linear-gradient(
+            145deg,
+            rgba(255,255,255,.055),
+            rgba(255,255,255,.018)
+          );
+
+        transition:
+          transform .35s ease,
+          background .35s ease,
+          border-color .35s ease;
+      }
+
+      .services__card:hover {
+        transform: translateY(-7px);
+
+        background:
+          linear-gradient(
+            145deg,
+            rgba(198,161,91,.1),
+            rgba(255,255,255,.025)
+          );
+      }
+
+      .services__icon {
+        margin-bottom: 24px;
+        color: var(--gold);
+      }
+
+      .services__card h3 {
+        margin-bottom: 9px;
+
+        font-family: var(--font-display);
+        font-size: 20px;
+      }
+
+      .services__card p {
+        color: rgba(255,255,255,.6);
+
+        font-size: 12px;
+        line-height: 1.75;
+      }
+
+      /* ======================================================
+         WHY
+      ====================================================== */
+
+      .why__inner {
+        display: grid;
+        grid-template-columns: .85fr 1.15fr;
+        align-items: center;
+        gap: 80px;
+      }
+
+      .why__image {
+        position: relative;
+      }
+
+      .why__image img {
+        width: 100%;
+        height: 560px;
+
+        object-fit: cover;
+
+        border-radius: 5px;
+      }
+
+      .why__image::before {
+        content: "";
+
+        position: absolute;
+        top: -16px;
+        left: -16px;
+
+        width: 105px;
+        height: 105px;
+
+        border-top: 1px solid var(--gold);
+        border-left: 1px solid var(--gold);
+      }
+
+      .why__list {
+        display: grid;
+        gap: 14px;
+
+        margin-top: 32px;
+      }
+
+      .why__list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+
+        color: var(--text);
+
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .why__check {
+        width: 24px;
+        height: 24px;
+
+        display: grid;
+        place-items: center;
+
+        flex: 0 0 auto;
+
+        border: 1px solid rgba(198,161,91,.5);
+
+        color: var(--gold-dark);
+      }
+
+      /* ======================================================
+         AREAS
+      ====================================================== */
+
+      .areas__grid {
+        display: grid;
+
+        grid-template-columns: 1.3fr 1fr 1fr;
+        grid-template-rows: 260px 260px;
+
+        gap: 15px;
+
+        margin-top: 52px;
+      }
+
+      .areas__card {
+        position: relative;
+
+        overflow: hidden;
+
+        border-radius: 5px;
+
+        color: white;
+
+        box-shadow:
+          0 15px 40px rgba(7,17,31,.08);
+      }
+
+      .areas__card:first-child {
+        grid-row: span 2;
+      }
+
+      .areas__card img {
+        width: 100%;
+        height: 100%;
+
+        object-fit: cover;
+
+        transition:
+          transform .8s cubic-bezier(.22,1,.36,1);
+      }
+
+      .areas__card:hover img {
+        transform: scale(1.07);
+      }
+
+      .areas__overlay {
+        position: absolute;
+        inset: 0;
+
+        background:
+          linear-gradient(
+            to top,
+            rgba(3,9,17,.9),
+            rgba(3,9,17,.04) 65%
+          );
+      }
+
+      .areas__text {
+        position: absolute;
+        right: 22px;
+        bottom: 21px;
+        left: 22px;
+      }
+
+      .areas__text h3 {
+        margin-bottom: 5px;
+
+        font-family: var(--font-display);
+        font-size: 25px;
+        font-weight: 500;
+      }
+
+      .areas__text p {
+        max-width: 300px;
+
+        color: rgba(255,255,255,.72);
+
+        font-size: 11.5px;
+        line-height: 1.6;
+      }
+
+      .areas__arrow {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+
+        color: var(--gold-light);
+
+        opacity: 0;
+        transform: translate(-5px,5px);
+
+        transition: all .3s ease;
+      }
+
+      .areas__card:hover .areas__arrow {
+        opacity: 1;
+        transform: translate(0,0);
+      }
+
+      /* ======================================================
+         TESTIMONIALS
+      ====================================================== */
+
+      .testimonials {
+        overflow: hidden;
+      }
+
+      .testimonials__quote-mark {
+        margin-bottom: 17px;
+
+        color: rgba(198,161,91,.35);
+      }
+
+      .testimonials__stage {
+        position: relative;
+
+        min-height: 270px;
+
+        max-width: 880px;
+      }
+
+      .testimonials__quote {
+        color: white;
+
+        font-family: var(--font-display);
+        font-size: clamp(24px,3.1vw,42px);
+        line-height: 1.38;
+      }
+
+      .testimonials__meta {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+
+        margin-top: 28px;
+      }
+
+      .testimonials__avatar {
+        width: 44px;
+        height: 44px;
+
+        display: grid;
+        place-items: center;
+
+        flex: 0 0 auto;
+
+        border-radius: 50%;
+
+        color: white;
+
+        background:
+          linear-gradient(
+            135deg,
+            var(--gold),
+            var(--gold-dark)
+          );
+
+        font-family: var(--font-display);
+
+        box-shadow:
+          0 0 0 5px rgba(198,161,91,.1);
+      }
+
+      .testimonials__name {
+        color: white;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .testimonials__context {
+        color: rgba(255,255,255,.5);
+        font-size: 11px;
+      }
+
+      .testimonials__controls {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+
+        margin-top: 25px;
+      }
+
+      .testimonials__arrow {
+        width: 44px;
+        height: 44px;
+
+        display: grid;
+        place-items: center;
+
+        border: 1px solid rgba(255,255,255,.2);
+
+        color: white;
+
+        transition: all .25s ease;
+      }
+
+      .testimonials__arrow:hover {
+        color: var(--gold);
+        border-color: var(--gold);
+      }
+
+      .testimonials__dots {
+        display: flex;
+        gap: 7px;
+      }
+
+      .testimonials__dot {
+        width: 23px;
+        height: 2px;
+
+        background: rgba(255,255,255,.24);
+
+        transition: background .3s ease;
+      }
+
+      .testimonials__dot--active {
+        background: var(--gold);
+      }
+
+      .testimonials__note {
+        margin-top: 28px;
+
+        color: rgba(255,255,255,.35);
+
+        font-size: 10px;
+      }
+
+      /* ======================================================
+         CINEMATIC
+      ====================================================== */
+
+      .cinematic {
+        position: relative;
+
+        min-height: 620px;
+
+        display: flex;
+        align-items: center;
+
+        color: white;
+
+        background:
+          url("https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=2200&q=85")
+          center / cover no-repeat;
+      }
+
+      .cinematic__overlay {
+        position: absolute;
+        inset: 0;
+
+        background:
+          linear-gradient(
+            90deg,
+            rgba(5,12,21,.92),
+            rgba(5,12,21,.42)
+          );
+      }
+
+      .cinematic::after {
+        content: "";
+
+        position: absolute;
+        inset: 0;
+
+        pointer-events: none;
+
+        background:
+          radial-gradient(
+            circle at 70% 45%,
+            rgba(198,161,91,.14),
+            transparent 30%
+          );
+      }
+
+      .cinematic__content {
+        position: relative;
+        z-index: 2;
+      }
+
+      .cinematic__content h2 {
+        max-width: 700px;
+
+        margin-bottom: 20px;
+
+        font-family: var(--font-display);
+        font-size: clamp(40px,5.3vw,65px);
+        font-weight: 500;
+        line-height: 1.06;
+      }
+
+      .cinematic__content p {
+        max-width: 570px;
+
+        margin-bottom: 28px;
+
+        color: rgba(255,255,255,.72);
+
+        font-size: 15px;
+        line-height: 1.85;
+      }
+
+      /* ======================================================
+         PROCESS
+      ====================================================== */
+
+      .process__row {
+        position: relative;
+
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+
+        gap: 32px;
+
+        margin-top: 54px;
+      }
+
+      .process__row::before {
+        content: "";
+
+        position: absolute;
+
+        top: 26px;
+        left: 7%;
+        right: 7%;
+
+        height: 1px;
+
+        background:
+          rgba(198,161,91,.35);
+      }
+
+      .process__step {
+        position: relative;
+        z-index: 1;
+      }
+
+      .process__number {
+        width: 52px;
+        height: 52px;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        margin-bottom: 20px;
+
+        border: 1px solid var(--gold);
+
+        color: var(--gold-dark);
+        background: white;
+
+        font-family: var(--font-display);
+      }
+
+      .process__step h3 {
+        margin-bottom: 8px;
+
+        font-family: var(--font-display);
+        font-size: 18px;
+      }
+
+      .process__step p {
+        color: var(--text-light);
+
+        font-size: 12.5px;
+        line-height: 1.75;
+      }
+
+      /* ======================================================
+         INVESTMENT CTA
+      ====================================================== */
+
+      .investment-cta__inner {
+        position: relative;
+
+        overflow: hidden;
+
+        padding: 68px;
+
+        border: 1px solid rgba(198,161,91,.24);
+        border-radius: 5px;
+
+        background:
+          linear-gradient(
+            120deg,
+            rgba(198,161,91,.14),
+            transparent 62%
+          );
+
+        box-shadow:
+          0 25px 70px rgba(0,0,0,.16);
+      }
+
+      .investment-cta__inner::after {
+        content: "";
+
+        position: absolute;
+
+        width: 360px;
+        height: 360px;
+
+        right: -170px;
+        top: -190px;
+
+        border: 1px solid rgba(198,161,91,.18);
+        border-radius: 50%;
+
+        box-shadow:
+          0 0 0 55px rgba(198,161,91,.035),
+          0 0 0 110px rgba(198,161,91,.02);
+      }
+
+      .investment-cta__inner h2 {
+        position: relative;
+        z-index: 1;
+
+        max-width: 650px;
+
+        margin-bottom: 14px;
+
+        font-family: var(--font-display);
+        font-size: clamp(31px,4vw,48px);
+        font-weight: 500;
+        line-height: 1.1;
+      }
+
+      .investment-cta__inner p {
+        position: relative;
+        z-index: 1;
+
+        max-width: 550px;
+
+        margin-bottom: 28px;
+
+        color: rgba(255,255,255,.62);
+
+        font-size: 14px;
+      }
+
+      .investment-cta__buttons {
+        position: relative;
+        z-index: 2;
+
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      /* ======================================================
+         ABOUT
+      ====================================================== */
+
+      .about__inner {
+        display: grid;
+        grid-template-columns: .9fr 1.1fr;
+        align-items: center;
+        gap: 70px;
+      }
+
+      .about__image {
+        position: relative;
+      }
+
+      .about__image img {
+        width: 100%;
+        height: 480px;
+
+        object-fit: cover;
+
+        border-radius: 5px;
+      }
+
+      .about__copy p:not(.kicker) {
+        margin-bottom: 18px;
+
+        color: var(--text-light);
+
+        font-size: 14px;
+        line-height: 1.9;
+      }
+
+      /* ======================================================
+         CONTACT
+      ====================================================== */
+
+      .contact__grid {
+        display: grid;
+        grid-template-columns: .8fr 1.2fr;
+
+        align-items: start;
+
+        gap: 70px;
+
+        margin-top: 52px;
+      }
+
+      .contact__item {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+
+        margin-bottom: 25px;
+      }
+
+      .contact__item svg {
+        flex: 0 0 auto;
+
+        margin-top: 2px;
+
+        color: var(--gold);
+      }
+
+      .contact__item p,
+      .contact__item a {
+        color: var(--text);
+
+        font-size: 13.5px;
+        line-height: 1.7;
+      }
+
+      .contact__item a:hover {
+        color: var(--gold-dark);
+      }
+
+      .contact__form {
+        padding: 42px;
+
+        border: 1px solid rgba(7,17,31,.08);
+        border-radius: 5px;
+
+        background: white;
+
+        box-shadow:
+          0 20px 55px rgba(7,17,31,.07);
+      }
+
+      .contact__row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .contact__field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        margin-bottom: 20px;
+      }
+
+      .contact__field label {
+        color: var(--text-muted);
+
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+
+      .contact__field input,
+      .contact__field select,
+      .contact__field textarea {
+        width: 100%;
+
+        padding: 11px 0;
+
+        border: 0;
+        border-bottom: 1px solid var(--border);
+
+        outline: none;
+
+        color: var(--text);
+
+        background: transparent;
+
+        font-size: 13px;
+
+        transition:
+          border-color .25s ease,
+          box-shadow .25s ease;
+      }
+
+      .contact__field input:focus,
+      .contact__field select:focus,
+      .contact__field textarea:focus {
+        border-color: var(--gold);
+
+        box-shadow:
+          0 3px 0 rgba(198,161,91,.1);
+      }
+
+      .contact__field textarea {
+        min-height: 105px;
+
+        resize: vertical;
+      }
+
+      .contact__submit {
+        width: 100%;
+        margin-top: 5px;
+      }
+
+      /* ======================================================
+         TOAST
+      ====================================================== */
+
+      .toast {
+        position: fixed;
+
+        left: 50%;
+        bottom: 25px;
+
+        z-index: 7000;
+
+        width: min(
+          calc(100% - 32px),
+          450px
+        );
+
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+
+        padding: 15px 18px;
+
+        border-left: 3px solid var(--gold);
+
+        color: white;
+        background: var(--navy);
+
+        box-shadow:
+          0 20px 50px rgba(0,0,0,.3);
+
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      .toast svg {
+        flex: 0 0 auto;
+        margin-top: 1px;
+        color: var(--gold);
+      }
+
+      /* ======================================================
+         FOOTER
+      ====================================================== */
+
+      .footer {
+        padding: 70px 0 25px;
+
+        color: white;
+
+        background: #040a13;
+      }
+
+      .footer__top {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 1fr 1fr;
+        gap: 45px;
+
+        padding-bottom: 45px;
+
+        border-bottom: 1px solid rgba(255,255,255,.08);
+      }
+
+      .footer__brand h3 {
+        max-width: 250px;
+
+        margin-top: 15px;
+
+        font-family: var(--font-display);
+        font-size: 16px;
+        line-height: 1.35;
+      }
+
+      .footer__brand p {
+        margin-top: 11px;
+
+        color: rgba(255,255,255,.42);
+
+        font-size: 12px;
+      }
+
+      .footer__col h4 {
+        margin-bottom: 17px;
+
+        color: var(--gold-light);
+
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+
+      .footer__col ul {
+        display: grid;
+        gap: 10px;
+      }
+
+      .footer__col li,
+      .footer__col a {
+        color: rgba(255,255,255,.53);
+
+        font-size: 11.5px;
+      }
+
+      .footer__col a:hover {
+        color: var(--gold);
+      }
+
+      .footer__bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 15px;
+
+        padding-top: 22px;
+
+        color: rgba(255,255,255,.32);
+
+        font-size: 10.5px;
+      }
+
+      .footer__social {
+        display: flex;
+        gap: 8px;
+      }
+
+      .footer__social a {
+        width: 36px;
+        height: 36px;
+
+        display: grid;
+        place-items: center;
+
+        border: 1px solid rgba(255,255,255,.13);
+
+        transition: all .25s ease;
+      }
+
+      .footer__social a:hover {
+        color: var(--gold);
+        border-color: var(--gold);
+      }
+
+      /* ======================================================
+         FLOATING BUTTONS
+      ====================================================== */
+
+      .whatsapp-float {
+        position: fixed;
+
+        right: 25px;
+        bottom: 25px;
+
+        z-index: 2500;
+
+        width: 58px;
+        height: 58px;
+
+        display: grid;
+        place-items: center;
+
+        border-radius: 50%;
+
+        color: white;
+        background: #25d366;
+
+        box-shadow:
+          0 14px 35px rgba(0,0,0,.25);
+      }
+
+      .whatsapp-float__pulse {
+        position: absolute;
+        inset: 0;
+
+        border-radius: 50%;
+
+        background: #25d366;
+
+        animation: pulse 2.2s ease-out infinite;
+
+        z-index: -1;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          opacity: .5;
+        }
+
+        100% {
+          transform: scale(1.8);
+          opacity: 0;
+        }
+      }
+
+      .whatsapp-float__tooltip {
+        position: absolute;
+
+        right: 69px;
+
+        padding: 8px 12px;
+
+        color: white;
+        background: var(--navy);
+
+        white-space: nowrap;
+
+        font-size: 11px;
+
+        opacity: 0;
+        transform: translateX(5px);
+
+        pointer-events: none;
+
+        transition: all .25s ease;
+      }
+
+      .whatsapp-float:hover
+      .whatsapp-float__tooltip {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .back-to-top {
+        position: fixed;
+
+        right: 32px;
+        bottom: 95px;
+
+        z-index: 2400;
+
+        width: 44px;
+        height: 44px;
+
+        display: grid;
+        place-items: center;
+
+        border: 1px solid rgba(255,255,255,.1);
+
+        color: white;
+        background: var(--navy);
+
+        box-shadow:
+          0 12px 30px rgba(7,17,31,.18);
+
+        transition: all .25s ease;
+      }
+
+      .back-to-top:hover {
+        background: var(--gold);
+      }
+
+      /* ======================================================
+         TABLET
+      ====================================================== */
+
+      @media (max-width: 1100px) {
+
+        .navbar__links {
+          gap: 18px;
+        }
+
+        .navbar__links a {
+          font-size: 10.5px;
+        }
+
+        .property-grid {
+          grid-template-columns: repeat(2,1fr);
+        }
+
+        .services__grid {
+          grid-template-columns: repeat(2,1fr);
+        }
+
+        .stats__grid {
+          grid-template-columns: repeat(2,1fr);
+        }
+
+        .stats__card:nth-child(2) {
+          border-right: 0;
+        }
+
+        .stats__card:nth-child(-n+2) {
+          border-bottom: 1px solid var(--border);
+        }
+
+        .trust__grid {
+          grid-template-columns: repeat(2,1fr);
+        }
+
+        .trust__card:nth-child(2) {
+          border-right: 0;
+        }
+
+        .trust__card:nth-child(-n+2) {
+          border-bottom: 1px solid var(--border);
+        }
+
+        .why__inner,
+        .about__inner {
+          gap: 45px;
+        }
+
+        .contact__grid {
+          gap: 45px;
+        }
+
+        .footer__top {
+          grid-template-columns: 1.2fr 1fr 1fr;
+        }
+      }
+
+      /* ======================================================
+         TABLET / MOBILE NAV
+      ====================================================== */
+
+      @media (max-width: 900px) {
+
+        .container {
+          width: min(
+            calc(100% - 36px),
+            var(--container)
+          );
+        }
+
+        .navbar {
+          height: 76px;
+        }
+
+        .navbar--scrolled {
+          height: 68px;
+        }
+
+        .navbar__links,
+        .navbar__actions .btn {
+          display: none;
+        }
+
+        .navbar__hamburger {
+          display: flex;
+        }
+
+        .hero {
+          min-height: 850px;
+          padding-top: 130px;
+        }
+
+        .hero__content {
+          width: min(
+            calc(100% - 36px),
+            var(--container)
+          );
+        }
+
+        .hero__heading {
+          max-width: 720px;
+        }
+
+        .hero-search {
+          width: min(
+            calc(100% - 36px),
+            var(--container)
+          );
+
+          margin-top: 42px;
+        }
+
+        .hero-search__panel {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .hero-search__submit {
+          grid-column: 1/-1;
+          min-height: 56px;
+        }
+
+        .property-grid {
+          grid-template-columns: repeat(2,1fr);
+        }
+
+        .property-card__media {
+          height: 245px;
+        }
+
+        .why__inner {
+          grid-template-columns: 1fr;
+        }
+
+        .why__image img {
+          height: 430px;
+        }
+
+        .areas__grid {
+          grid-template-columns: 1fr 1fr;
+          grid-template-rows: 230px 230px 230px;
+        }
+
+        .areas__card:first-child {
+          grid-column: 1/-1;
+          grid-row: auto;
+        }
+
+        .process__row {
+          grid-template-columns: 1fr 1fr;
+          gap: 45px 30px;
+        }
+
+        .process__row::before {
+          display: none;
+        }
+
+        .investment-cta__inner {
+          padding: 50px 40px;
+        }
+
+        .about__inner {
+          grid-template-columns: 1fr;
+        }
+
+        .about__image img {
+          height: 430px;
+        }
+
+        .contact__grid {
+          grid-template-columns: 1fr;
+        }
+
+        .footer__top {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      /* ======================================================
+         MOBILE
+      ====================================================== */
+
+      @media (max-width: 600px) {
+
+        html {
+          scroll-behavior: smooth;
+        }
+
+        .container {
+          width: calc(100% - 32px);
+        }
+
+        .section {
+          padding: 76px 0;
+        }
+
+        .section:not(.section--navy)::after {
+          width: calc(100% - 40px);
+        }
+
+        .heading {
+          font-size: clamp(
+            32px,
+            9vw,
+            42px
+          );
+        }
+
+        .kicker {
+          font-size: 15px;
+        }
+
+        /* NAV */
+
+        .navbar__brand-name {
+          font-size: 14px;
+        }
+
+        .navbar__brand-name span {
+          font-size: 8.5px;
+        }
+
+        .navbar__brand-mark {
+          width: 39px;
+          height: 39px;
+          font-size: 16px;
+        }
+
+        /* HERO */
+
+        .hero {
+          min-height: auto;
+
+          padding-top: 125px;
+          padding-bottom: 40px;
+
+          justify-content: flex-start;
+        }
+
+        .hero__image {
+          inset: -4% -10%;
+
+          background-position:
+            64% center;
+        }
+
+        .hero__overlay {
+          background:
+            linear-gradient(
+              180deg,
+              rgba(2,7,14,.94) 0%,
+              rgba(3,9,17,.8) 48%,
+              rgba(3,8,14,.92) 100%
+            );
+        }
+
+        .hero__content {
+          width: calc(100% - 32px);
+        }
+
+        .hero__kicker {
+          max-width: 310px;
+
+          margin-bottom: 16px;
+
+          font-size: 15px;
+          line-height: 1.5;
+        }
+
+        .hero__heading {
+          max-width: 100%;
+
+          margin-bottom: 20px;
+
+          font-size:
+            clamp(44px, 13vw, 64px);
+
+          line-height: .98;
+
+          letter-spacing: -.045em;
+        }
+
+        .hero__sub {
+          max-width: 100%;
+
+          margin-bottom: 25px;
+
+          font-size: 13.5px;
+          line-height: 1.75;
+        }
+
+        .hero__buttons {
+          width: 100%;
+
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+
+        .hero__buttons .btn {
+          width: 100%;
+        }
+
+        .hero__trust {
+          gap: 10px 16px;
+
+          margin-top: 28px;
+
+          font-size: 9.5px;
+        }
+
+        .hero-search {
+          width: calc(100% - 32px);
+
+          margin-top: 34px;
+        }
+
+        .hero-search__panel {
+          grid-template-columns: 1fr;
+
+          border-radius: 4px;
+        }
+
+        .hero-search__field {
+          padding: 15px 17px;
+
+          border-right: 0;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .hero-search__field:last-of-type {
+          border-bottom: 0;
+        }
+
+        .hero-search__submit {
+          grid-column: auto;
+
+          min-height: 54px;
+        }
+
+        .hero__scroll {
+          display: none;
+        }
+
+        /* MARQUEE */
+
+        .marquee {
+          padding: 15px 0;
+        }
+
+        .marquee__item {
+          gap: 14px;
+
+          padding-right: 14px;
+
+          font-size: 17px;
+        }
+
+        /* STATS */
+
+        .stats {
+          padding: 48px 0;
+        }
+
+        .stats__grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stats__card {
+          min-height: auto;
+
+          padding: 26px 22px;
+
+          border-right: 0;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .stats__card:last-child {
+          border-bottom: 0;
+        }
+
+        .stats__value {
+          font-size: 42px;
+        }
+
+        .stats__label {
+          max-width: 280px;
+        }
+
+        /* TRUST */
+
+        .trust__grid {
+          grid-template-columns: 1fr;
+
+          margin-top: 35px;
+        }
+
+        .trust__card {
+          min-height: auto;
+
+          padding: 27px 22px;
+
+          border-right: 0;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .trust__card:last-child {
+          border-bottom: 0;
+        }
+
+        .trust__icon {
+          margin-bottom: 14px;
+        }
+
+        /* SECTION INTRO */
+
+        .section__intro {
+          display: block;
+
+          margin-bottom: 35px;
+        }
+
+        .section__note {
+          margin-top: 12px;
+        }
+
+        /* PROPERTY */
+
+        .property-grid {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        .property-card__media {
+          height: 230px;
+        }
+
+        .property-card__body {
+          padding: 20px;
+        }
+
+        .property-card__top {
+          flex-direction: column;
+          gap: 5px;
+        }
+
+        .property-card__top h3 {
+          font-size: 21px;
+        }
+
+        .property-card__price {
+          text-align: left;
+          font-size: 12px;
+        }
+
+        .property-card__meta {
+          gap: 10px 14px;
+        }
+
+        /* MODAL */
+
+        .modal-backdrop {
+          align-items: flex-start;
+
+          padding:
+            12px
+            12px
+            max(12px, env(safe-area-inset-bottom));
+        }
+
+        .modal {
+          width: 100%;
+
+          grid-template-columns: 1fr;
+
+          margin: auto 0;
+
+          max-height:
+            calc(100svh - 24px);
+
+          overflow-y: auto;
+        }
+
+        .modal__media {
+          min-height: 220px;
+
+          height: 220px;
+        }
+
+        .modal__media img {
+          min-height: 220px;
+          height: 220px;
+        }
+
+        .modal__body {
+          padding: 28px 22px 24px;
+
+          max-height: none;
+          overflow: visible;
+        }
+
+        .modal__body h3 {
+          font-size: 28px;
+        }
+
+        .modal__price {
+          font-size: 21px;
+        }
+
+        .modal__description {
+          font-size: 13px;
+        }
+
+        .modal__actions {
+          display: grid;
+          grid-template-columns: 1fr;
+        }
+
+        .modal__actions .btn {
+          width: 100%;
+        }
+
+        /* SERVICES */
+
+        .services__grid {
+          grid-template-columns: 1fr;
+
+          margin-top: 35px;
+        }
+
+        .services__card {
+          min-height: auto;
+
+          padding: 28px 22px;
+
+          border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        .services__card:last-child {
+          border-bottom: 0;
+        }
+
+        /* WHY */
+
+        .why__inner {
+          gap: 45px;
+        }
+
+        .why__image img {
+          height: 330px;
+        }
+
+        .why__image::before {
+          top: -10px;
+          left: -10px;
+
+          width: 75px;
+          height: 75px;
+        }
+
+        .why__list {
+          gap: 12px;
+
+          margin-top: 26px;
+        }
+
+        .why__list li {
+          font-size: 13px;
+        }
+
+        /* AREAS */
+
+        .areas__grid {
+          display: grid;
+
+          grid-template-columns: 1fr;
+          grid-template-rows: repeat(5,210px);
+
+          gap: 12px;
+
+          margin-top: 35px;
+        }
+
+        .areas__card:first-child {
+          grid-column: auto;
+          grid-row: auto;
+        }
+
+        .areas__text {
+          right: 18px;
+          bottom: 18px;
+          left: 18px;
+        }
+
+        .areas__text h3 {
+          font-size: 24px;
+        }
+
+        .areas__text p {
+          font-size: 11px;
+        }
+
+        .areas__arrow {
+          opacity: 1;
+          transform: none;
+        }
+
+        /* TESTIMONIALS */
+
+        .testimonials__quote-mark {
+          width: 36px;
+          height: 36px;
+        }
+
+        .testimonials__stage {
+          min-height: 330px;
+        }
+
+        .testimonials__quote {
+          font-size: 23px;
+          line-height: 1.48;
+        }
+
+        .testimonials__controls {
+          margin-top: 10px;
+        }
+
+        /* CINEMATIC */
+
+        .cinematic {
+          min-height: 560px;
+
+          background-position: 62% center;
+        }
+
+        .cinematic__overlay {
+          background:
+            linear-gradient(
+              180deg,
+              rgba(5,12,21,.86),
+              rgba(5,12,21,.8)
+            );
+        }
+
+        .cinematic__content h2 {
+          font-size: 40px;
+        }
+
+        .cinematic__content p {
+          font-size: 13.5px;
+        }
+
+        /* PROCESS */
+
+        .process__row {
+          grid-template-columns: 1fr;
+
+          gap: 30px;
+
+          margin-top: 38px;
+        }
+
+        .process__step {
+          display: grid;
+
+          grid-template-columns: 52px 1fr;
+
+          column-gap: 15px;
+        }
+
+        .process__number {
+          grid-row: span 2;
+
+          margin-bottom: 0;
+        }
+
+        .process__step h3 {
+          margin-top: 3px;
+        }
+
+        .process__step p {
+          grid-column: 2;
+        }
+
+        /* CTA */
+
+        .investment-cta__inner {
+          padding: 35px 23px;
+        }
+
+        .investment-cta__inner h2 {
+          font-size: 31px;
+        }
+
+        .investment-cta__inner p {
+          font-size: 13px;
+        }
+
+        .investment-cta__buttons {
+          display: grid;
+          grid-template-columns: 1fr;
+        }
+
+        .investment-cta__buttons .btn {
+          width: 100%;
+        }
+
+        /* ABOUT */
+
+        .about__inner {
+          gap: 38px;
+        }
+
+        .about__image img {
+          height: 300px;
+        }
+
+        .about__copy p:not(.kicker) {
+          font-size: 13.5px;
+        }
+
+        /* CONTACT */
+
+        .contact__grid {
+          gap: 35px;
+
+          margin-top: 38px;
+        }
+
+        .contact__form {
+          padding: 28px 20px;
+        }
+
+        .contact__row {
+          grid-template-columns: 1fr;
+          gap: 0;
+        }
+
+        .contact__field input,
+        .contact__field select,
+        .contact__field textarea {
+          font-size: 14px;
+        }
+
+        /* FOOTER */
+
+        .footer {
+          padding: 55px 0 20px;
+        }
+
+        .footer__top {
+          grid-template-columns: 1fr;
+
+          gap: 35px;
+
+          padding-bottom: 35px;
+        }
+
+        .footer__bottom {
+          flex-direction: column;
+          align-items: flex-start;
+
+          padding-top: 20px;
+        }
+
+        /* FLOATING */
+
+        .whatsapp-float {
+          right: 16px;
+          bottom:
+            max(16px, env(safe-area-inset-bottom));
+
+          width: 54px;
+          height: 54px;
+        }
+
+        .whatsapp-float__tooltip {
+          display: none;
+        }
+
+        .back-to-top {
+          right: 17px;
+          bottom: 83px;
+
+          width: 40px;
+          height: 40px;
+        }
+
+        .toast {
+          bottom:
+            max(80px, calc(env(safe-area-inset-bottom) + 70px));
+        }
+      }
+
+      /* ======================================================
+         VERY SMALL PHONES
+      ====================================================== */
+
+      @media (max-width: 380px) {
+
+        .container,
+        .hero__content,
+        .hero-search {
+          width: calc(100% - 26px);
+        }
+
+        .hero__heading {
+          font-size: 42px;
+        }
+
+        .hero__sub {
+          font-size: 12.5px;
+        }
+
+        .navbar__brand-name {
+          display: none;
+        }
+
+        .property-card__media {
+          height: 215px;
+        }
+
+        .modal__body {
+          padding: 25px 18px;
+        }
+
+        .modal__body h3 {
+          font-size: 25px;
+        }
+
+        .testimonials__quote {
+          font-size: 21px;
+        }
+      }
+
+      /* ======================================================
+         REDUCED MOTION
+      ====================================================== */
+
+      @media (prefers-reduced-motion: reduce) {
+
+        html {
+          scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+          animation-duration: .01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: .01ms !important;
+        }
+      }
+    `}</style>
+  );
+}
+
+/* ============================================================
+   SCROLL PROGRESS
+============================================================ */
+
+function ScrollProgressBar() {
+  const { scrollYProgress } = useScroll();
+
+  return (
+    <motion.div
+      className="scroll-progress"
+      style={{
+        scaleX: scrollYProgress,
+      }}
+    />
   );
 }
 
@@ -2322,138 +3995,196 @@ function CountUp({ value, suffix = "" }) {
    NAVBAR
 ============================================================ */
 
-function Navbar() {
-  const scrolled = useScrollFlag();
-  const [open, setOpen] = useState(false);
+function Navbar({
+  onOpenMenu,
+  menuOpen,
+  onCloseMenu,
+}) {
+  const scrolled = useScrollFlag(60);
 
-  const links = [
-    ["Home", "home"],
-    ["Properties", "properties"],
-    ["Services", "services"],
-    ["Areas", "areas"],
-    ["About", "about"],
-    ["Contact", "contact"],
-  ];
+  const handleNavigation = (event, id) => {
+    event.preventDefault();
 
-  const go = (id) => {
-    setOpen(false);
-    setTimeout(() => scrollToId(id), 100);
+    onCloseMenu();
+
+    window.setTimeout(() => {
+      scrollToId(id);
+    }, menuOpen ? 180 : 0);
   };
 
   return (
     <>
-      <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
-        <div className="nav-inner">
-          <button className="brand" onClick={() => go("home")}>
-            <div className="brand-mark">
-              <span>PP</span>
-            </div>
+      <header
+        className={`navbar ${
+          scrolled ? "navbar--scrolled" : ""
+        }`}
+      >
+        <div className="navbar__inner container">
 
-            <div className="brand-text">
-              <strong>Prime Property</strong>
-              <small>& Developers</small>
-            </div>
-          </button>
+          <a
+            href="#home"
+            className="navbar__brand"
+            onClick={(event) =>
+              handleNavigation(event, "home")
+            }
+          >
+            <span className="navbar__brand-mark">
+              PP
+            </span>
 
-          <div className="nav-links">
-            {links.map(([label, id]) => (
-              <button
-                key={id}
-                className="nav-link"
-                onClick={() => scrollToId(id)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          <a className="nav-contact" href={`tel:+${COMPANY.phoneIntl}`}>
-            <Phone size={14} />
-            {COMPANY.phone}
+            <span className="navbar__brand-name">
+              Prime Property
+              <span>
+                &amp; Developers
+              </span>
+            </span>
           </a>
 
-          <button
-            className="menu-btn"
-            aria-label="Open menu"
-            onClick={() => setOpen(true)}
+          <nav
+            className="navbar__links"
+            aria-label="Primary navigation"
           >
-            <Menu size={21} />
-          </button>
-        </div>
-      </nav>
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.id}
+                href={`#${link.id}`}
+                onClick={(event) =>
+                  handleNavigation(event, link.id)
+                }
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="mobile-menu"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <button
-              className="menu-btn"
-              style={{ position: "absolute", right: 15, top: 14 }}
-              onClick={() => setOpen(false)}
+          <div className="navbar__actions">
+
+            <a
+              href="#contact"
+              className="btn btn--gold btn--small"
+              onClick={(event) =>
+                handleNavigation(event, "contact")
+              }
             >
-              <X size={21} />
+              Book Consultation
+            </a>
+
+            <button
+              type="button"
+              className="navbar__hamburger"
+              aria-label="Open navigation menu"
+              aria-expanded={menuOpen}
+              onClick={onOpenMenu}
+            >
+              <Menu size={23} />
             </button>
 
-            <motion.div
-              className="mobile-menu-links"
+          </div>
+        </div>
+      </header>
+
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            className="mobile-menu"
+            initial={{
+              opacity: 0,
+              x: "100%",
+            }}
+            animate={{
+              opacity: 1,
+              x: 0,
+            }}
+            exit={{
+              opacity: 0,
+              x: "100%",
+            }}
+            transition={{
+              duration: .3,
+              ease: [0.22,1,.36,1],
+            }}
+          >
+            <div className="mobile-menu__top">
+
+              <span className="navbar__brand-mark">
+                PP
+              </span>
+
+              <button
+                type="button"
+                className="mobile-menu__close"
+                aria-label="Close navigation menu"
+                onClick={onCloseMenu}
+              >
+                <X size={25} />
+              </button>
+
+            </div>
+
+            <motion.nav
+              className="mobile-menu__links"
+              aria-label="Mobile navigation"
               initial="hidden"
               animate="visible"
               variants={{
                 visible: {
                   transition: {
-                    staggerChildren: 0.07,
+                    staggerChildren: .055,
+                    delayChildren: .1,
                   },
                 },
               }}
             >
-              {links.map(([label, id]) => (
-                <motion.button
-                  key={id}
-                  className="mobile-link"
-                  onClick={() => go(id)}
+              {NAV_LINKS.map((link) => (
+                <motion.a
+                  key={link.id}
+                  href={`#${link.id}`}
                   variants={{
-                    hidden: { opacity: 0, x: -20 },
-                    visible: { opacity: 1, x: 0 },
+                    hidden: {
+                      opacity: 0,
+                      x: 20,
+                    },
+
+                    visible: {
+                      opacity: 1,
+                      x: 0,
+                    },
                   }}
+                  onClick={(event) =>
+                    handleNavigation(
+                      event,
+                      link.id
+                    )
+                  }
                 >
-                  {label}
-                  <ArrowUpRight />
-                </motion.button>
+                  {link.label}
+                </motion.a>
               ))}
-            </motion.div>
 
-            <div className="mobile-contact">
-              <a href={`tel:+${COMPANY.phoneIntl}`}>
-                <Phone size={17} />
-                {COMPANY.phone}
-              </a>
+              <motion.a
+                href="#contact"
+                className="btn btn--gold mobile-menu__cta"
+                variants={{
+                  hidden: {
+                    opacity: 0,
+                    y: 15,
+                  },
 
-              <a href={`mailto:${COMPANY.email}`}>
-                <Mail size={17} />
-                {COMPANY.email}
-              </a>
-
-              <a
-                href={WA()}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  color: "var(--navy)",
-                  background: "var(--gold)",
-                  padding: "15px 18px",
-                  borderRadius: "999px",
-                  justifyContent: "center",
-                  fontWeight: 800,
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                  },
                 }}
+                onClick={(event) =>
+                  handleNavigation(
+                    event,
+                    "contact"
+                  )
+                }
               >
-                <MessageCircle size={17} />
-                Chat on WhatsApp
-              </a>
-            </div>
+                Book Consultation
+              </motion.a>
+            </motion.nav>
           </motion.div>
         )}
       </AnimatePresence>
@@ -2465,216 +4196,388 @@ function Navbar() {
    HERO
 ============================================================ */
 
-function Hero() {
+function Hero({
+  filters,
+  setFilters,
+  onSearch,
+}) {
   const reduceMotion = useReducedMotion();
-  const { scrollY } = useScroll();
 
-  const imageY = useTransform(scrollY, [0, 800], [0, reduceMotion ? 0 : 100]);
+  const heroRef = useRef(null);
+
+  const [glow, setGlow] = useState({
+    x: 0,
+    y: 0,
+    opacity: 0,
+  });
+
+  const {
+    scrollYProgress,
+  } = useScroll({
+    target: heroRef,
+    offset: [
+      "start start",
+      "end start",
+    ],
+  });
+
   const imageScale = useTransform(
-    scrollY,
-    [0, 800],
-    [1, reduceMotion ? 1 : 1.08]
+    scrollYProgress,
+    [0,1],
+    [1,1.2]
   );
 
+  const contentY = useTransform(
+    scrollYProgress,
+    [0,.9],
+    [0,110]
+  );
+
+  const contentOpacity = useTransform(
+    scrollYProgress,
+    [0,.75],
+    [1,0]
+  );
+
+  const handleMouseMove = (event) => {
+    if (
+      reduceMotion ||
+      !heroRef.current
+    ) {
+      return;
+    }
+
+    const rect =
+      heroRef.current.getBoundingClientRect();
+
+    setGlow({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+      opacity: 1,
+    });
+  };
+
   return (
-    <section id="home" className="hero">
-      <motion.div
-        className="hero-image"
-        style={{ y: imageY, scale: imageScale }}
-      />
+    <section
+      id="home"
+      ref={heroRef}
+      className="hero"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() =>
+        setGlow((current) => ({
+          ...current,
+          opacity: 0,
+        }))
+      }
+    >
 
-      <div className="hero-grid" />
-
       <motion.div
-        className="hero-orb one"
-        animate={
+        className="hero__image"
+        style={
           reduceMotion
-            ? {}
+            ? undefined
             : {
-                y: [0, -20, 0],
-                rotate: [0, 12, 0],
+                scale: imageScale,
               }
         }
-        transition={{ duration: 8, repeat: Infinity }}
+        initial={
+          reduceMotion
+            ? false
+            : {
+                scale: 1.08,
+              }
+        }
+        animate={{
+          scale: 1,
+        }}
+        transition={{
+          duration: 1.5,
+          ease: [0.22,1,.36,1],
+        }}
+      />
+
+      <div
+        className="hero__overlay"
+        aria-hidden="true"
+      />
+
+      <div
+        className="hero__glow"
+        aria-hidden="true"
+        style={{
+          left: glow.x,
+          top: glow.y,
+          opacity: glow.opacity,
+        }}
       />
 
       <motion.div
-        className="hero-orb two"
-        animate={
+        className="hero__content"
+        style={
           reduceMotion
-            ? {}
+            ? undefined
             : {
-                y: [0, 18, 0],
-                x: [0, -15, 0],
+                y: contentY,
+                opacity: contentOpacity,
               }
         }
-        transition={{ duration: 7, repeat: Infinity }}
-      />
+      >
 
-      <div className="hero-content">
-        <motion.div
-          className="hero-copy"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
+        <motion.p
+          className="hero__kicker"
+          initial={{
+            opacity: 0,
+            y: 12,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            duration: .7,
+            delay: .2,
+          }}
         >
-          <div className="hero-kicker">
-            <span />
-            Islamabad's Property Specialists
-          </div>
+          Islamabad&rsquo;s prime addresses,
+          handled personally
+        </motion.p>
 
-          <h1 className="hero-title">
-            Find a place
-            <br />
-            <em>worth calling</em>
-            <br />
-            home.
-          </h1>
+        <motion.h1
+          className="hero__heading"
+          initial={{
+            opacity: 0,
+            y: 25,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            duration: .8,
+            delay: .35,
+          }}
+        >
+          Your Prime Address in Islamabad.
+        </motion.h1>
 
-          <p className="hero-description">
-            Premium residential and commercial real estate solutions in
-            Islamabad — built around trust, market knowledge and your long-term
-            goals.
-          </p>
+        <motion.p
+          className="hero__sub"
+          initial={{
+            opacity: 0,
+          }}
+          animate={{
+            opacity: 1,
+          }}
+          transition={{
+            duration: .8,
+            delay: .65,
+          }}
+        >
+          Premium property consultancy, sales,
+          rentals and investment solutions across
+          Islamabad&rsquo;s most sought-after sectors.
+        </motion.p>
 
-          <div className="hero-actions">
-            <button
-              className="btn btn-gold"
-              onClick={() => scrollToId("properties")}
+        <motion.div
+          className="hero__buttons"
+          initial={{
+            opacity: 0,
+            y: 15,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            duration: .7,
+            delay: .85,
+          }}
+        >
+
+          <a
+            href="#properties"
+            className="btn btn--gold"
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToId("properties");
+            }}
+          >
+            Explore Properties
+          </a>
+
+          <a
+            href="#contact"
+            className="btn btn--outline"
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToId("contact");
+            }}
+          >
+            Book a Consultation
+          </a>
+
+        </motion.div>
+
+        <motion.div
+          className="hero__trust"
+          initial={{
+            opacity: 0,
+          }}
+          animate={{
+            opacity: 1,
+          }}
+          transition={{
+            duration: .8,
+            delay: 1,
+          }}
+        >
+          <span>Residential</span>
+          <span>Commercial</span>
+          <span>Investment Advisory</span>
+        </motion.div>
+
+      </motion.div>
+
+      <motion.div
+        className="hero-search"
+        initial={{
+          opacity: 0,
+          y: 35,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        transition={{
+          duration: .75,
+          delay: 1,
+          ease: "easeOut",
+        }}
+      >
+
+        <form
+          className="hero-search__panel"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onSearch();
+          }}
+        >
+
+          <div className="hero-search__field">
+            <label htmlFor="lookingFor">
+              Looking for
+            </label>
+
+            <select
+              id="lookingFor"
+              value={filters.purpose}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  purpose:
+                    event.target.value,
+                }))
+              }
             >
-              Explore Properties
-              <ArrowUpRight size={15} />
-            </button>
-
-            <a
-              className="btn btn-outline"
-              href={WA(
-                "Hello Prime Property & Developers, I would like to discuss a property opportunity."
+              {LOOKING_FOR_OPTIONS.map(
+                (option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                  >
+                    {option.label}
+                  </option>
+                )
               )}
-              target="_blank"
-              rel="noreferrer"
+            </select>
+          </div>
+
+          <div className="hero-search__field">
+            <label htmlFor="propertyType">
+              Property type
+            </label>
+
+            <select
+              id="propertyType"
+              value={filters.type}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  type:
+                    event.target.value,
+                }))
+              }
             >
-              <MessageCircle size={15} />
-              WhatsApp Us
-            </a>
+              {PROPERTY_TYPE_OPTIONS.map(
+                (option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                  >
+                    {option.label}
+                  </option>
+                )
+              )}
+            </select>
           </div>
 
-          <div className="hero-trust">
-            <span>
-              <ShieldCheck size={13} />
-              Trusted guidance
-            </span>
+          <div className="hero-search__field">
+            <label htmlFor="location">
+              Location
+            </label>
 
-            <span>
-              <Award size={13} />
-              Premium properties
-            </span>
-
-            <span>
-              <Compass size={13} />
-              Islamabad specialists
-            </span>
+            <select
+              id="location"
+              value={filters.location}
+              onChange={(event) =>
+                setFilters((current) => ({
+                  ...current,
+                  location:
+                    event.target.value,
+                }))
+              }
+            >
+              {LOCATION_OPTIONS.map(
+                (option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                  >
+                    {option.label}
+                  </option>
+                )
+              )}
+            </select>
           </div>
-        </motion.div>
-      </div>
 
-      <div className="scroll-indicator">
-        Scroll
-        <motion.div
-          className="scroll-line"
-          animate={reduceMotion ? {} : { scaleY: [1, .4, 1] }}
-          transition={{ duration: 1.8, repeat: Infinity }}
-        />
-      </div>
+          <button
+            type="submit"
+            className="btn btn--gold hero-search__submit"
+          >
+            <Search size={17} />
+            Search Property
+          </button>
+
+        </form>
+      </motion.div>
+
+      <motion.div
+        className="hero__scroll"
+        initial={{
+          opacity: 0,
+        }}
+        animate={{
+          opacity: 1,
+        }}
+        transition={{
+          delay: 1.4,
+        }}
+      >
+        <span>SCROLL</span>
+        <span className="hero__scroll-line" />
+      </motion.div>
+
     </section>
-  );
-}
-
-/* ============================================================
-   SEARCH
-============================================================ */
-
-function SearchBox({ onSearch }) {
-  const [purpose, setPurpose] = useState("Buy");
-  const [type, setType] = useState("All");
-  const [location, setLocation] = useState("All");
-
-  return (
-    <div className="search-wrap">
-      <div className="container">
-        <motion.div
-          className="search-panel"
-          initial={{ opacity: 0, y: 25 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: .6 }}
-        >
-          <div className="search-top">
-            <span className="search-title">Find your property</span>
-            <span className="search-label">Curated opportunities</span>
-          </div>
-
-          <div className="search-fields">
-            <div className="field">
-              <Search className="field-icon" size={17} />
-
-              <select
-                value={purpose}
-                onChange={(e) => setPurpose(e.target.value)}
-              >
-                <option>Buy</option>
-                <option>Rent</option>
-                <option>Invest</option>
-              </select>
-
-              <ChevronDown className="field-chevron" size={14} />
-            </div>
-
-            <div className="field">
-              <Building2 className="field-icon" size={17} />
-
-              <select
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-              >
-                <option>All</option>
-                <option>House</option>
-                <option>Apartment</option>
-                <option>Commercial</option>
-              </select>
-
-              <ChevronDown className="field-chevron" size={14} />
-            </div>
-
-            <div className="field">
-              <MapPin className="field-icon" size={17} />
-
-              <select
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              >
-                <option>All</option>
-                <option>F-6</option>
-                <option>F-7</option>
-                <option>F-8</option>
-                <option>E-7</option>
-                <option>Blue Area</option>
-              </select>
-
-              <ChevronDown className="field-chevron" size={14} />
-            </div>
-
-            <button
-              className="search-btn"
-              onClick={() => onSearch({ purpose, type, location })}
-            >
-              <Search size={16} />
-              Search
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    </div>
   );
 }
 
@@ -2684,22 +4587,35 @@ function SearchBox({ onSearch }) {
 
 function Marquee() {
   const items = [
-    "F-6 Islamabad",
-    "F-7 Islamabad",
-    "F-8 Islamabad",
-    "E-7 Islamabad",
+    "F-6",
+    "F-7",
+    "F-8",
+    "E-7",
     "Blue Area",
-    "Premium Real Estate",
+    "Buy",
+    "Rent",
+    "Invest",
+  ];
+
+  const loop = [
+    ...items,
+    ...items,
   ];
 
   return (
-    <div className="marquee">
-      <div className="marquee-track">
-        {[...items, ...items].map((item, i) => (
-          <div className="marquee-item" key={i}>
+    <div
+      className="marquee"
+      aria-hidden="true"
+    >
+      <div className="marquee__track">
+        {loop.map((item,index) => (
+          <span
+            key={`${item}-${index}`}
+            className="marquee__item"
+          >
             {item}
-            <span>✦</span>
-          </div>
+            <MapPin size={15} />
+          </span>
         ))}
       </div>
     </div>
@@ -2711,30 +4627,108 @@ function Marquee() {
 ============================================================ */
 
 function Stats() {
-  const icons = [Clock3, Building2, MapPin, Users];
+  return (
+    <section className="stats">
+      <div className="container">
+
+        <div className="stats__grid">
+          {STATS.map((stat,index) => (
+            <Reveal
+              key={stat.label}
+              as="div"
+              className="stats__card"
+              delay={index * .06}
+            >
+              <span className="stats__value">
+                <CountUp
+                  value={stat.value}
+                  suffix={stat.suffix}
+                />
+              </span>
+
+              <p className="stats__label">
+                {stat.label}
+              </p>
+            </Reveal>
+          ))}
+        </div>
+
+        <p className="stats__note">
+          Figures shown are illustrative demo content
+          for this preview website.
+        </p>
+
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   TRUST
+============================================================ */
+
+function TrustSection() {
+  const items = [
+    {
+      icon: MapPin,
+      title: "Prime Locations",
+      detail: "F-6, F-7, F-8, E-7",
+    },
+
+    {
+      icon: HomeIcon,
+      title: "Property Expertise",
+      detail: "Residential & commercial",
+    },
+
+    {
+      icon: Handshake,
+      title: "Complete Solutions",
+      detail: "Sales, purchase, rental",
+    },
+
+    {
+      icon: TrendingUp,
+      title: "Investment Focus",
+      detail: "Strategic guidance",
+    },
+  ];
 
   return (
-    <section className="section" style={{ paddingBottom: 60 }}>
+    <section className="section section--ivory">
       <div className="container">
-        <div className="stats">
-          {stats.map((stat, index) => {
-            const Icon = icons[index];
+
+        <Reveal
+          as="h2"
+          className="heading"
+        >
+          Real estate, with a clearer perspective.
+        </Reveal>
+
+        <div className="trust__grid">
+          {items.map((item,index) => {
+            const Icon = item.icon;
 
             return (
-              <Reveal key={stat.label} delay={index * .08}>
-                <div className="stat">
-                  <Icon className="stat-icon" size={20} />
+              <Reveal
+                key={item.title}
+                as="div"
+                className="trust__card"
+                delay={index * .07}
+              >
+                <Icon
+                  className="trust__icon"
+                  size={27}
+                />
 
-                  <div className="stat-number">
-                    <CountUp value={stat.value} suffix={stat.suffix} />
-                  </div>
+                <h3>{item.title}</h3>
 
-                  <div className="stat-label">{stat.label}</div>
-                </div>
+                <p>{item.detail}</p>
               </Reveal>
             );
           })}
         </div>
+
       </div>
     </section>
   );
@@ -2744,335 +4738,450 @@ function Stats() {
    PROPERTY CARD
 ============================================================ */
 
-function PropertyCard({ property, onClick }) {
+function PropertyCard({
+  property,
+  onView,
+}) {
+  const propertyType =
+    property.type === "commercial"
+      ? "Commercial"
+      : property.type === "apartment"
+      ? "Apartment"
+      : "Residential";
+
   return (
     <motion.article
       className="property-card"
-      whileTap={{ scale: .985 }}
-      onClick={() => onClick(property)}
-      layout
+      initial={{
+        opacity: 0,
+        y: 30,
+      }}
+      whileInView={{
+        opacity: 1,
+        y: 0,
+      }}
+      viewport={{
+        once: true,
+        amount: .1,
+      }}
+      transition={{
+        duration: .55,
+      }}
     >
-      <div className="property-image">
-        <img src={property.image} alt={property.title} loading="lazy" />
 
-        <span className="property-tag">{property.tag}</span>
+      <div className="property-card__media">
 
-        <span className="property-arrow">
-          <ArrowUpRight size={17} />
+        <img
+          src={property.image}
+          alt={`${property.title} in ${property.location}`}
+          loading="lazy"
+        />
+
+        <span className="property-card__badge">
+          {propertyType}
         </span>
+
       </div>
 
-      <div className="property-body">
-        <div className="property-location">
-          <MapPin size={11} />
-          {property.location}
+      <div className="property-card__body">
+
+        <div className="property-card__top">
+
+          <h3>{property.title}</h3>
+
+          <span className="property-card__price">
+            {property.price}
+          </span>
+
         </div>
 
-        <h3 className="property-title">{property.title}</h3>
+        <p className="property-card__location">
+          <MapPin size={15} />
+          {property.location}
+        </p>
 
-        <div className="property-price">{property.price}</div>
+        <div className="property-card__meta">
 
-        <div className="property-meta">
-          {property.beds > 0 && (
+          {property.beds !== null && (
             <span>
-              <BedDouble size={13} />
+              <Bed size={15} />
               {property.beds} Beds
             </span>
           )}
 
-          <span>
-            <Bath size={13} />
-            {property.baths} Baths
-          </span>
+          {property.baths !== null && (
+            <span>
+              <Bath size={15} />
+              {property.baths} Baths
+            </span>
+          )}
 
           <span>
-            <Maximize size={13} />
-            {property.area}
+            <Maximize size={15} />
+            {property.size}
           </span>
+
         </div>
+
+        <div className="property-card__actions">
+
+          <button
+            type="button"
+            className="property-card__view"
+            onClick={() =>
+              onView(property)
+            }
+          >
+            View Property
+            <ArrowUpRight
+              size={16}
+              className="property-card__arrow"
+            />
+          </button>
+
+          <a
+            href={waLink(
+              `Hello Prime Property & Developers, I am interested in ${property.title} (${property.location}).`
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="property-card__whatsapp"
+            aria-label={`Ask about ${property.title} on WhatsApp`}
+          >
+            <MessageCircle size={17} />
+          </a>
+
+        </div>
+
       </div>
+
     </motion.article>
   );
 }
 
 /* ============================================================
-   PROPERTIES
+   FEATURED PROPERTIES
 ============================================================ */
 
-function FeaturedProperties({ onSelect, filters }) {
+function FeaturedProperties({
+  filters,
+  onView,
+  resultsRef,
+}) {
   const filtered = useMemo(() => {
-    return properties.filter((property) => {
-      const purposeMatch =
-        filters.purpose === "All" || property.purpose === filters.purpose;
+    return PROPERTIES.filter(
+      (property) => {
 
-      const typeMatch =
-        filters.type === "All" || property.type === filters.type;
+        if (
+          filters.purpose &&
+          property.purpose !== filters.purpose
+        ) {
+          return false;
+        }
 
-      const locationMatch =
-        filters.location === "All" ||
-        property.location.startsWith(filters.location);
+        if (
+          filters.type &&
+          property.type !== filters.type
+        ) {
+          return false;
+        }
 
-      return purposeMatch && typeMatch && locationMatch;
-    });
+        if (
+          filters.location &&
+          property.locationTag !== filters.location
+        ) {
+          return false;
+        }
+
+        return true;
+      }
+    );
   }, [filters]);
 
+  const isFiltered =
+    filters.purpose ||
+    filters.type ||
+    filters.location;
+
   return (
-    <section id="properties" className="section section--cream">
+    <section
+      id="properties"
+      className="section"
+      ref={resultsRef}
+    >
       <div className="container">
-        <Reveal>
-          <div className="section-heading">
-            <div className="eyebrow">Curated portfolio</div>
 
-            <h2 className="section-title">
-              Properties with
-              <br />
-              <i>possibility.</i>
-            </h2>
+        <div className="section__intro">
 
-            <p className="section-description">
-              Explore a selection of residential and commercial opportunities
-              across Islamabad's most sought-after locations.
+          <div>
+
+            <Reveal
+              as="p"
+              className="kicker"
+            >
+              Featured properties
+            </Reveal>
+
+            <Reveal
+              as="h2"
+              className="heading"
+              delay={.05}
+            >
+              Selected opportunities across
+              Islamabad&rsquo;s prime sectors.
+            </Reveal>
+
+            <p className="section__note">
+              Featured listings can be replaced
+              with the client&rsquo;s live inventory,
+              pricing and availability.
+            </p>
+
+          </div>
+
+        </div>
+
+        {filtered.length > 0 ? (
+          <div className="property-grid">
+            {filtered.map((property) => (
+              <PropertyCard
+                key={property.id}
+                property={property}
+                onView={onView}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="property-grid__empty">
+            <p>
+              No demo properties match that search.
+              Try a different combination.
             </p>
           </div>
-        </Reveal>
+        )}
 
-        <AnimatePresence mode="popLayout">
-          {filtered.length > 0 ? (
-            <motion.div className="property-grid" layout>
-              {filtered.map((property, index) => (
-                <motion.div
-                  key={property.id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * .05 }}
-                >
-                  <PropertyCard
-                    property={property}
-                    onClick={onSelect}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              style={{
-                padding: "60px 20px",
-                textAlign: "center",
-                background: "white",
-                borderRadius: 20,
-              }}
-            >
-              <Search
-                size={32}
-                color="var(--gold)"
-                style={{ marginBottom: 15 }}
-              />
+        {isFiltered && (
+          <p className="property-grid__count">
+            Showing {filtered.length} of{" "}
+            {PROPERTIES.length} demo properties
+          </p>
+        )}
 
-              <h3
-                style={{
-                  fontFamily: "Playfair Display",
-                  fontSize: 28,
-                  margin: 0,
-                }}
-              >
-                No matching properties
-              </h3>
-
-              <p style={{ color: "var(--muted)", fontSize: 12 }}>
-                Try changing your search filters.
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </section>
   );
 }
 
 /* ============================================================
-   MODAL
+   PROPERTY MODAL
 ============================================================ */
 
-function PropertyModal({ property, onClose }) {
-  if (!property) return null;
+function PropertyModal({
+  property,
+  onClose,
+}) {
+  useEffect(() => {
+    if (!property) return undefined;
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener(
+      "keydown",
+      onKeyDown
+    );
+
+    const previousOverflow =
+      document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener(
+        "keydown",
+        onKeyDown
+      );
+
+      document.body.style.overflow =
+        previousOverflow;
+    };
+  }, [property, onClose]);
+
+  if (!property) {
+    return null;
+  }
+
+  const propertyType =
+    property.type === "commercial"
+      ? "Commercial"
+      : property.type === "apartment"
+      ? "Apartment"
+      : "Residential";
 
   return (
-    <AnimatePresence>
-      <motion.div
-        className="modal-backdrop"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-      >
-        <motion.div
-          className="modal"
-          initial={{ opacity: 0, y: 30, scale: .97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="modal-image">
-            <img src={property.image} alt={property.title} />
+    <motion.div
+      className="modal-backdrop"
+      initial={{
+        opacity: 0,
+      }}
+      animate={{
+        opacity: 1,
+      }}
+      exit={{
+        opacity: 0,
+      }}
+      onMouseDown={(event) => {
+        if (
+          event.target ===
+          event.currentTarget
+        ) {
+          onClose();
+        }
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={property.title}
+    >
 
-            <button
-              className="modal-close"
-              onClick={onClose}
-              aria-label="Close"
-            >
-              <X size={19} />
-            </button>
+      <motion.div
+        className="modal"
+        initial={{
+          opacity: 0,
+          y: 25,
+          scale: .98,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          scale: 1,
+        }}
+        exit={{
+          opacity: 0,
+          y: 20,
+          scale: .98,
+        }}
+        transition={{
+          duration: .3,
+        }}
+      >
+
+        <button
+          type="button"
+          className="modal__close"
+          aria-label="Close property details"
+          onClick={onClose}
+        >
+          <X size={21} />
+        </button>
+
+        <div className="modal__media">
+          <img
+            src={property.image}
+            alt={`${property.title} in ${property.location}`}
+          />
+        </div>
+
+        <div className="modal__body">
+
+          <span className="modal__badge">
+            {propertyType}
+          </span>
+
+          <h3>{property.title}</h3>
+
+          <p className="modal__location">
+            <MapPin size={15} />
+            {property.location}
+          </p>
+
+          <p className="modal__price">
+            {property.price}
+          </p>
+
+          <p className="modal__description">
+            {property.description}
+          </p>
+
+          <div className="modal__meta">
+
+            {property.beds !== null && (
+              <span>
+                <Bed size={16} />
+                {property.beds} Beds
+              </span>
+            )}
+
+            {property.baths !== null && (
+              <span>
+                <Bath size={16} />
+                {property.baths} Baths
+              </span>
+            )}
+
+            <span>
+              <Maximize size={16} />
+              {property.size}
+            </span>
+
           </div>
 
-          <div className="modal-content">
-            <div className="eyebrow">{property.tag}</div>
+          <div className="modal__features">
 
-            <h2>{property.title}</h2>
+            <h4>Features</h4>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                color: "var(--muted)",
-                fontSize: 11,
-              }}
-            >
-              <MapPin size={13} color="var(--gold)" />
-              {property.location}
-            </div>
-
-            <div className="modal-price">{property.price}</div>
-
-            <p className="modal-description">
-              {property.description}
-            </p>
-
-            <div className="modal-meta">
-              {property.beds > 0 && (
-                <div className="modal-meta-item">
-                  <BedDouble size={17} />
-                  <span>{property.beds} Beds</span>
-                </div>
+            <ul>
+              {property.features.map(
+                (feature) => (
+                  <li key={feature}>
+                    <Check size={14} />
+                    {feature}
+                  </li>
+                )
               )}
+            </ul>
 
-              <div className="modal-meta-item">
-                <Bath size={17} />
-                <span>{property.baths} Baths</span>
-              </div>
+          </div>
 
-              <div className="modal-meta-item">
-                <Maximize size={17} />
-                <span>{property.area}</span>
-              </div>
-            </div>
+          <div className="modal__actions">
 
             <a
-              href={WA(
-                `Hello Prime Property & Developers, I am interested in ${property.title} in ${property.location}. Please share more details.`
+              href="#contact"
+              className="btn btn--gold"
+              onClick={(event) => {
+                event.preventDefault();
+
+                onClose();
+
+                setTimeout(() => {
+                  scrollToId("contact");
+                }, 200);
+              }}
+            >
+              Contact Us
+            </a>
+
+            <a
+              href={waLink(
+                `Hello Prime Property & Developers, I am interested in ${property.title} (${property.location}).`
               )}
               target="_blank"
-              rel="noreferrer"
-              className="btn btn-gold"
-              style={{ width: "100%" }}
+              rel="noopener noreferrer"
+              className="btn btn--outline-dark"
             >
               <MessageCircle size={16} />
-              Enquire on WhatsApp
+              WhatsApp
             </a>
+
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
-  );
-}
 
-/* ============================================================
-   ABOUT
-============================================================ */
-
-function About() {
-  return (
-    <section id="about" className="section">
-      <div className="container">
-        <div className="split">
-          <Reveal>
-            <div className="image-stack">
-              <img
-                className="image-main"
-                src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=85"
-                alt="Luxury property"
-              />
-
-              <img
-                className="image-small"
-                src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=800&q=85"
-                alt="Luxury interior"
-              />
-
-              <motion.div
-                className="floating-badge"
-                animate={{ rotate: [0, 3, -3, 0] }}
-                transition={{ duration: 5, repeat: Infinity }}
-              >
-                <div>
-                  <Sparkles size={18} />
-                  <br />
-                  Prime
-                  <br />
-                  Standard
-                </div>
-              </motion.div>
-            </div>
-          </Reveal>
-
-          <Reveal delay={.15}>
-            <div>
-              <div className="eyebrow">Why Prime Property</div>
-
-              <h2 className="section-title">
-                Property is
-                <br />
-                personal.
-              </h2>
-
-              <p className="section-description">
-                We believe finding the right property is about more than
-                square footage and price. It is about finding the right
-                opportunity for your life, your family or your future.
-              </p>
-
-              <div className="check-list">
-                {[
-                  "Local knowledge across Islamabad's prime sectors",
-                  "Personalised property recommendations",
-                  "Professional buying, selling and rental guidance",
-                  "Transparent communication throughout the process",
-                ].map((item) => (
-                  <div className="check-item" key={item}>
-                    <span className="check-item-icon">
-                      <Check size={14} />
-                    </span>
-
-                    {item}
-                  </div>
-                ))}
-              </div>
-
-              <button
-                className="btn btn-gold"
-                onClick={() => scrollToId("contact")}
-              >
-                Talk to our team
-                <ArrowUpRight size={15} />
-              </button>
-            </div>
-          </Reveal>
         </div>
-      </div>
-    </section>
+
+      </motion.div>
+
+    </motion.div>
   );
 }
 
@@ -3082,54 +5191,164 @@ function About() {
 
 function Services() {
   return (
-    <section id="services" className="section section--navy">
+    <section
+      id="services"
+      className="section section--navy"
+    >
       <div className="container">
-        <Reveal>
-          <div className="section-heading">
-            <div className="eyebrow">What we do</div>
 
-            <h2 className="section-title">
-              A smarter way
-              <br />
-              to move forward.
-            </h2>
-
-            <p className="section-description">
-              From your first property search to your next investment, our
-              services are designed around clarity and confidence.
-            </p>
-          </div>
+        <Reveal
+          as="p"
+          className="kicker"
+        >
+          What we do
         </Reveal>
 
-        <div className="services-grid">
-          {services.map((service, index) => {
-            const Icon = service.icon;
+        <Reveal
+          as="h2"
+          className="heading"
+          delay={.05}
+        >
+          Real estate solutions built around you.
+        </Reveal>
 
-            return (
-              <motion.div
-                className="service"
-                key={service.title}
-                initial={{ opacity: 0, y: 25 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * .08 }}
-              >
-                <div className="service-number">{service.number}</div>
+        <div className="services__grid">
 
-                <motion.div
-                  className="service-icon"
-                  whileHover={{ rotate: 8, scale: 1.1 }}
+          {SERVICES.map(
+            (service,index) => {
+              const Icon = service.icon;
+
+              return (
+                <Reveal
+                  key={service.title}
+                  as="div"
+                  className="services__card"
+                  delay={index * .07}
                 >
-                  <Icon size={28} />
-                </motion.div>
 
-                <h3>{service.title}</h3>
+                  <Icon
+                    className="services__icon"
+                    size={29}
+                  />
 
-                <p>{service.text}</p>
-              </motion.div>
-            );
-          })}
+                  <h3>
+                    {service.title}
+                  </h3>
+
+                  <p>
+                    {service.description}
+                  </p>
+
+                </Reveal>
+              );
+            }
+          )}
+
         </div>
+
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   WHY PRIME
+============================================================ */
+
+function WhyPrime() {
+  return (
+    <section className="section">
+      <div className="container why__inner">
+
+        <motion.div
+          className="why__image"
+          initial={{
+            opacity: 0,
+            x: -35,
+          }}
+          whileInView={{
+            opacity: 1,
+            x: 0,
+          }}
+          viewport={{
+            once: true,
+            amount: .15,
+          }}
+          transition={{
+            duration: .75,
+          }}
+        >
+          <img
+            src="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?auto=format&fit=crop&w=1200&q=85"
+            alt="Premium residential interior"
+            loading="lazy"
+          />
+        </motion.div>
+
+        <motion.div
+          initial={{
+            opacity: 0,
+            x: 35,
+          }}
+          whileInView={{
+            opacity: 1,
+            x: 0,
+          }}
+          viewport={{
+            once: true,
+            amount: .15,
+          }}
+          transition={{
+            duration: .75,
+            delay: .08,
+          }}
+        >
+
+          <p className="kicker">
+            Why Prime Property
+          </p>
+
+          <h2 className="heading">
+            More than property.
+            A better investment decision.
+          </h2>
+
+          <ul className="why__list">
+
+            {WHY_POINTS.map(
+              (point,index) => (
+                <motion.li
+                  key={point}
+                  initial={{
+                    opacity: 0,
+                    x: 12,
+                  }}
+                  whileInView={{
+                    opacity: 1,
+                    x: 0,
+                  }}
+                  viewport={{
+                    once: true,
+                    amount: .4,
+                  }}
+                  transition={{
+                    duration: .45,
+                    delay: index * .055,
+                  }}
+                >
+                  <span className="why__check">
+                    <Check size={14} />
+                  </span>
+
+                  <span>{point}</span>
+                </motion.li>
+              )
+            )}
+
+          </ul>
+
+        </motion.div>
+
       </div>
     </section>
   );
@@ -3141,45 +5360,82 @@ function Services() {
 
 function Areas() {
   return (
-    <section id="areas" className="section">
+    <section
+      id="areas"
+      className="section section--ivory"
+    >
       <div className="container">
-        <Reveal>
-          <div className="section-heading center">
-            <div className="eyebrow">Prime locations</div>
 
-            <h2 className="section-title">
-              Know the
-              <br />
-              <i>neighbourhood.</i>
-            </h2>
-
-            <p className="section-description" style={{ marginInline: "auto" }}>
-              Focused expertise in the areas that define Islamabad's premium
-              property market.
-            </p>
-          </div>
+        <Reveal
+          as="p"
+          className="kicker"
+        >
+          Where we work
         </Reveal>
 
-        <div className="areas-grid">
-          {areas.map((area, index) => (
-            <motion.div
-              className="area"
-              key={area.name}
-              initial={{ opacity: 0, scale: .96 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * .06 }}
-              whileHover={{ y: -5 }}
-            >
-              <img src={area.image} alt={area.name} loading="lazy" />
+        <Reveal
+          as="h2"
+          className="heading"
+          delay={.05}
+        >
+          Islamabad&rsquo;s prime addresses.
+        </Reveal>
 
-              <div className="area-content">
-                <h3>{area.name}</h3>
-                <p>{area.subtitle}</p>
-              </div>
-            </motion.div>
-          ))}
+        <div className="areas__grid">
+
+          {AREAS.map(
+            (area,index) => (
+              <motion.div
+                key={area.id}
+                className="areas__card"
+                initial={{
+                  opacity: 0,
+                  y: 25,
+                }}
+                whileInView={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                viewport={{
+                  once: true,
+                  amount: .1,
+                }}
+                transition={{
+                  duration: .55,
+                  delay: index * .06,
+                }}
+              >
+
+                <img
+                  src={area.image}
+                  alt={`${area.name}, Islamabad`}
+                  loading="lazy"
+                />
+
+                <div
+                  className="areas__overlay"
+                  aria-hidden="true"
+                />
+
+                <ArrowUpRight
+                  className="areas__arrow"
+                  size={20}
+                />
+
+                <div className="areas__text">
+                  <h3>{area.name}</h3>
+
+                  <p>
+                    {area.description}
+                  </p>
+                </div>
+
+              </motion.div>
+            )
+          )}
+
         </div>
+
       </div>
     </section>
   );
@@ -3190,65 +5446,248 @@ function Areas() {
 ============================================================ */
 
 function Testimonials() {
-  const [active, setActive] = useState(0);
+  const [index,setIndex] = useState(0);
+  const [direction,setDirection] = useState(1);
 
-  const next = () => setActive((v) => (v + 1) % testimonials.length);
-  const prev = () =>
-    setActive((v) => (v - 1 + testimonials.length) % testimonials.length);
+  const timerRef =
+    useRef(null);
+
+  const goTo = useCallback(
+    (next) => {
+      setDirection(
+        next > index ||
+        (
+          index ===
+            TESTIMONIALS.length - 1 &&
+          next === 0
+        )
+          ? 1
+          : -1
+      );
+
+      setIndex(next);
+    },
+    [index]
+  );
 
   useEffect(() => {
-    const timer = setInterval(next, 6000);
-    return () => clearInterval(timer);
+    timerRef.current =
+      window.setInterval(() => {
+        setDirection(1);
+
+        setIndex(
+          (current) =>
+            (current + 1) %
+            TESTIMONIALS.length
+        );
+      }, 6500);
+
+    return () =>
+      window.clearInterval(
+        timerRef.current
+      );
   }, []);
 
-  const testimonial = testimonials[active];
+  const current =
+    TESTIMONIALS[index];
+
+  const initials =
+    current.name
+      .split(" ")
+      .map((word) => word[0])
+      .slice(0,2)
+      .join("");
 
   return (
-    <section id="clients" className="section section--navy">
+    <section
+      id="testimonials"
+      className="section section--navy testimonials"
+    >
       <div className="container">
-        <div className="testimonial-wrap">
-          <Reveal>
-            <div className="eyebrow" style={{ justifyContent: "center" }}>
-              Client perspective
-            </div>
 
-            <Quote className="quote-icon" size={35} />
+        <p className="kicker">
+          In their words
+        </p>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={active}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: .35 }}
-              >
-                <p className="testimonial-quote">
-                  “{testimonial.quote}”
-                </p>
+        <h2
+          className="heading"
+          style={{
+            marginBottom: 42,
+          }}
+        >
+          What clients say about working with us.
+        </h2>
 
-                <div className="stars">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star key={star} size={13} fill="currentColor" />
-                  ))}
+        <Quote
+          className="testimonials__quote-mark"
+          size={42}
+        />
+
+        <div className="testimonials__stage">
+
+          <AnimatePresence
+            mode="wait"
+            custom={direction}
+          >
+            <motion.div
+              key={index}
+              custom={direction}
+              initial={{
+                opacity: 0,
+                x: 35 * direction,
+              }}
+              animate={{
+                opacity: 1,
+                x: 0,
+              }}
+              exit={{
+                opacity: 0,
+                x: -35 * direction,
+              }}
+              transition={{
+                duration: .45,
+                ease: [0.22,1,.36,1],
+              }}
+            >
+
+              <p className="testimonials__quote">
+                &ldquo;{current.quote}&rdquo;
+              </p>
+
+              <div className="testimonials__meta">
+
+                <span className="testimonials__avatar">
+                  {initials}
+                </span>
+
+                <div>
+                  <p className="testimonials__name">
+                    {current.name}
+                  </p>
+
+                  <p className="testimonials__context">
+                    {current.context}
+                  </p>
                 </div>
 
-                <p className="testimonial-name">{testimonial.name}</p>
-                <p className="testimonial-role">{testimonial.role}</p>
-              </motion.div>
-            </AnimatePresence>
+              </div>
 
-            <div className="slider-controls">
-              <button className="slider-btn" onClick={prev}>
-                <ArrowLeft size={16} />
-              </button>
+            </motion.div>
+          </AnimatePresence>
 
-              <button className="slider-btn" onClick={next}>
-                <ArrowRight size={16} />
-              </button>
-            </div>
-          </Reveal>
         </div>
+
+        <div className="testimonials__controls">
+
+          <button
+            type="button"
+            className="testimonials__arrow"
+            aria-label="Previous testimonial"
+            onClick={() =>
+              goTo(
+                (index - 1 +
+                  TESTIMONIALS.length) %
+                  TESTIMONIALS.length
+              )
+            }
+          >
+            <ArrowLeft size={17} />
+          </button>
+
+          <div className="testimonials__dots">
+
+            {TESTIMONIALS.map(
+              (testimonial,i) => (
+                <button
+                  key={testimonial.name}
+                  type="button"
+                  aria-label={`Go to testimonial ${
+                    i + 1
+                  }`}
+                  className={`testimonials__dot ${
+                    i === index
+                      ? "testimonials__dot--active"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    goTo(i)
+                  }
+                />
+              )
+            )}
+
+          </div>
+
+          <button
+            type="button"
+            className="testimonials__arrow"
+            aria-label="Next testimonial"
+            onClick={() =>
+              goTo(
+                (index + 1) %
+                  TESTIMONIALS.length
+              )
+            }
+          >
+            <ArrowRight size={17} />
+          </button>
+
+        </div>
+
+        <p className="testimonials__note">
+          Client testimonials can be replaced
+          with verified reviews and case studies
+          before launch.
+        </p>
+
       </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   CINEMATIC
+============================================================ */
+
+function Cinematic() {
+  return (
+    <section className="cinematic">
+
+      <div
+        className="cinematic__overlay"
+        aria-hidden="true"
+      />
+
+      <div className="container cinematic__content">
+
+        <Reveal as="h2">
+          Invest where Islamabad grows.
+        </Reveal>
+
+        <Reveal
+          as="p"
+          delay={.08}
+        >
+          Discover residential, commercial and
+          investment opportunities in one of
+          Pakistan&rsquo;s most prestigious cities.
+        </Reveal>
+
+        <Reveal
+          as="a"
+          href="#properties"
+          className="btn btn--gold"
+          delay={.15}
+          onClick={(event) => {
+            event.preventDefault();
+            scrollToId("properties");
+          }}
+        >
+          Explore Opportunities
+        </Reveal>
+
+      </div>
+
     </section>
   );
 }
@@ -3258,99 +5697,212 @@ function Testimonials() {
 ============================================================ */
 
 function Process() {
-  const steps = [
-    {
-      number: "01",
-      title: "Tell us what you need",
-      text: "Share your property goals, preferred location and budget.",
-    },
-    {
-      number: "02",
-      title: "Explore opportunities",
-      text: "We shortlist suitable properties based on your requirements.",
-    },
-    {
-      number: "03",
-      title: "Make an informed decision",
-      text: "Review the details and understand the opportunity clearly.",
-    },
-    {
-      number: "04",
-      title: "Move forward",
-      text: "Our team supports you through the next stage of your property journey.",
-    },
-  ];
-
   return (
-    <section className="section section--cream">
+    <section className="section section--ivory">
       <div className="container">
-        <Reveal>
-          <div className="section-heading">
-            <div className="eyebrow">Simple process</div>
 
-            <h2 className="section-title">
-              From search
-              <br />
-              to <i>signature.</i>
-            </h2>
-          </div>
+        <Reveal
+          as="p"
+          className="kicker"
+        >
+          How it works
         </Reveal>
 
-        <div className="process-grid">
-          {steps.map((step, index) => (
-            <Reveal key={step.number} delay={index * .08}>
-              <div className="process-card">
-                <div className="process-number">{step.number}</div>
+        <Reveal
+          as="h2"
+          className="heading"
+          delay={.05}
+        >
+          A simpler way to find the right property.
+        </Reveal>
 
-                <h3>{step.title}</h3>
+        <div className="process__row">
 
-                <p>{step.text}</p>
-              </div>
-            </Reveal>
-          ))}
+          {PROCESS_STEPS.map(
+            (step,index) => (
+              <motion.div
+                key={step.number}
+                className="process__step"
+                initial={{
+                  opacity: 0,
+                  y: 25,
+                }}
+                whileInView={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                viewport={{
+                  once: true,
+                  amount: .15,
+                }}
+                transition={{
+                  duration: .55,
+                  delay: index * .08,
+                }}
+              >
+
+                <span className="process__number">
+                  {step.number}
+                </span>
+
+                <h3>
+                  {step.title}
+                </h3>
+
+                <p>
+                  {step.description}
+                </p>
+
+              </motion.div>
+            )
+          )}
+
         </div>
+
       </div>
     </section>
   );
 }
 
 /* ============================================================
-   CTA
+   INVESTMENT CTA
 ============================================================ */
 
 function InvestmentCTA() {
   return (
-    <section className="section">
+    <section className="section section--navy">
       <div className="container">
-        <Reveal>
-          <div className="cta">
-            <div className="cta-content">
-              <div className="eyebrow">Your next move</div>
 
-              <h2>
-                Let's find
-                <br />
-                what's <i>next.</i>
-              </h2>
+        <Reveal
+          as="div"
+          className="investment-cta__inner"
+        >
 
-              <p>
-                Whether you're buying your first home, searching for a premium
-                rental or exploring your next investment, our team is ready to
-                help.
-              </p>
+          <h2>
+            Ready to make your next property move?
+          </h2>
 
-              <a
-                href={WA()}
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-gold"
-              >
-                Start a conversation
-                <ArrowUpRight size={15} />
-              </a>
-            </div>
+          <p>
+            Speak with our team for tailored
+            property advice, viewing support and
+            investment guidance.
+          </p>
+
+          <div className="investment-cta__buttons">
+
+            <a
+              href="#contact"
+              className="btn btn--gold"
+              onClick={(event) => {
+                event.preventDefault();
+                scrollToId("contact");
+              }}
+            >
+              Talk to an Expert
+            </a>
+
+            <a
+              href={waLink(
+                WHATSAPP_DEFAULT_MESSAGE
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn--outline"
+            >
+              WhatsApp Us
+            </a>
+
           </div>
+
         </Reveal>
+
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   ABOUT
+============================================================ */
+
+function About() {
+  return (
+    <section
+      id="about"
+      className="section"
+    >
+      <div className="container about__inner">
+
+        <motion.div
+          className="about__image"
+          initial={{
+            opacity: 0,
+            scale: 1.04,
+          }}
+          whileInView={{
+            opacity: 1,
+            scale: 1,
+          }}
+          viewport={{
+            once: true,
+            amount: .15,
+          }}
+          transition={{
+            duration: .8,
+          }}
+        >
+          <img
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85"
+            alt="Premium property exterior"
+            loading="lazy"
+          />
+        </motion.div>
+
+        <div className="about__copy">
+
+          <Reveal
+            as="p"
+            className="kicker"
+          >
+            About us
+          </Reveal>
+
+          <Reveal
+            as="h2"
+            className="heading"
+            delay={.05}
+            style={{
+              marginBottom: 24,
+            }}
+          >
+            Your trusted real estate partner in Islamabad.
+          </Reveal>
+
+          <Reveal
+            as="p"
+            delay={.1}
+          >
+            Prime Property &amp; Developers Pvt. Ltd.
+            is a real estate company based in Islamabad,
+            working with clients across the city&rsquo;s
+            most established sectors, including F-6,
+            F-7, F-8, E-7 and Blue Area.
+          </Reveal>
+
+          <Reveal
+            as="p"
+            delay={.14}
+          >
+            We provide property marketing and consultancy,
+            alongside support for sales, purchases and
+            rentals across both residential and commercial
+            properties &mdash; guided by what each client
+            actually needs, from the first conversation
+            through to completion.
+          </Reveal>
+
+        </div>
+
       </div>
     </section>
   );
@@ -3361,173 +5913,307 @@ function InvestmentCTA() {
 ============================================================ */
 
 function Contact() {
-  const [form, setForm] = useState({
+  const [form,setForm] = useState({
     name: "",
     phone: "",
-    interest: "Buying a property",
+    email: "",
+    interest: "",
     message: "",
   });
 
-  const [toast, setToast] = useState(false);
+  const [submitted,setSubmitted] =
+    useState(false);
 
-  const update = (key, value) =>
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const handleChange =
+    (field) =>
+    (event) => {
+      setForm((current) => ({
+        ...current,
+        [field]:
+          event.target.value,
+      }));
+    };
 
-  const submit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
 
-    const message = `
-Hello Prime Property & Developers,
+    const message = [
+      `New website inquiry from ${form.name}`,
+      `Phone: ${form.phone}`,
+      `Email: ${form.email}`,
+      `Interest: ${form.interest}`,
+      `Message: ${form.message}`,
+    ].join("\n");
 
-Name: ${form.name}
-Phone: ${form.phone}
-Interest: ${form.interest}
+    window.open(
+      waLink(message),
+      "_blank",
+      "noopener,noreferrer"
+    );
 
-Message:
-${form.message || "I would like to discuss a property opportunity."}
-    `.trim();
+    setSubmitted(true);
 
-    window.open(WA(message), "_blank");
+    setForm({
+      name: "",
+      phone: "",
+      email: "",
+      interest: "",
+      message: "",
+    });
 
-    setToast(true);
-
-    setTimeout(() => setToast(false), 3500);
+    window.setTimeout(() => {
+      setSubmitted(false);
+    }, 5000);
   };
 
   return (
-    <section id="contact" className="section section--cream">
+    <section
+      id="contact"
+      className="section section--ivory"
+    >
       <div className="container">
-        <div className="contact-grid">
-          <Reveal>
-            <div>
-              <div className="eyebrow">Let's connect</div>
 
-              <h2 className="section-title">
-                Have a property
-                <br />
-                <i>in mind?</i>
-              </h2>
+        <Reveal
+          as="p"
+          className="kicker"
+        >
+          Get in touch
+        </Reveal>
 
-              <p className="section-description">
-                Tell us what you're looking for and our team will help you
-                explore the right opportunities.
+        <Reveal
+          as="h2"
+          className="heading"
+          delay={.05}
+        >
+          Let&rsquo;s find your prime property.
+        </Reveal>
+
+        <div className="contact__grid">
+
+          <motion.div
+            initial={{
+              opacity: 0,
+              x: -25,
+            }}
+            whileInView={{
+              opacity: 1,
+              x: 0,
+            }}
+            viewport={{
+              once: true,
+              amount: .15,
+            }}
+            transition={{
+              duration: .65,
+            }}
+          >
+
+            <div className="contact__item">
+              <MapPin size={21} />
+
+              <p>
+                {COMPANY.address.map(
+                  (line) => (
+                    <span key={line}>
+                      {line}
+                      <br />
+                    </span>
+                  )
+                )}
               </p>
-
-              <div className="contact-list">
-                <div className="contact-item">
-                  <div className="contact-icon">
-                    <Phone size={18} />
-                  </div>
-
-                  <div>
-                    <strong>Call us</strong>
-                    <a href={`tel:+${COMPANY.phoneIntl}`}>
-                      {COMPANY.phone}
-                    </a>
-                  </div>
-                </div>
-
-                <div className="contact-item">
-                  <div className="contact-icon">
-                    <Mail size={18} />
-                  </div>
-
-                  <div>
-                    <strong>Email</strong>
-                    <a href={`mailto:${COMPANY.email}`}>
-                      {COMPANY.email}
-                    </a>
-                  </div>
-                </div>
-
-                <div className="contact-item">
-                  <div className="contact-icon">
-                    <MapPin size={18} />
-                  </div>
-
-                  <div>
-                    <strong>Visit us</strong>
-                    <span>{COMPANY.address}</span>
-                  </div>
-                </div>
-              </div>
             </div>
-          </Reveal>
 
-          <Reveal delay={.12}>
-            <form className="contact-form" onSubmit={submit}>
-              <div className="form-grid">
-                <div className="form-field">
-                  <label>Your name</label>
+            <div className="contact__item">
+              <Phone size={21} />
 
-                  <input
-                    required
-                    value={form.name}
-                    onChange={(e) => update("name", e.target.value)}
-                    placeholder="Enter your name"
-                  />
-                </div>
+              <a
+                href={`tel:+${COMPANY.phoneIntl}`}
+              >
+                {COMPANY.phone}
+              </a>
+            </div>
 
-                <div className="form-field">
-                  <label>Phone number</label>
+            <div className="contact__item">
+              <Mail size={21} />
 
-                  <input
-                    required
-                    value={form.phone}
-                    onChange={(e) => update("phone", e.target.value)}
-                    placeholder="03XX XXXXXXX"
-                  />
-                </div>
+              <a
+                href={`mailto:${COMPANY.email}`}
+              >
+                {COMPANY.email}
+              </a>
+            </div>
 
-                <div className="form-field full">
-                  <label>I'm interested in</label>
+          </motion.div>
 
-                  <select
-                    value={form.interest}
-                    onChange={(e) => update("interest", e.target.value)}
-                  >
-                    <option>Buying a property</option>
-                    <option>Renting a property</option>
-                    <option>Selling a property</option>
-                    <option>Property investment</option>
-                    <option>Commercial property</option>
-                    <option>General consultation</option>
-                  </select>
-                </div>
+          <motion.form
+            className="contact__form"
+            initial={{
+              opacity: 0,
+              x: 25,
+            }}
+            whileInView={{
+              opacity: 1,
+              x: 0,
+            }}
+            viewport={{
+              once: true,
+              amount: .15,
+            }}
+            transition={{
+              duration: .65,
+              delay: .08,
+            }}
+            onSubmit={handleSubmit}
+          >
 
-                <div className="form-field full">
-                  <label>Message</label>
+            <div className="contact__row">
 
-                  <textarea
-                    value={form.message}
-                    onChange={(e) => update("message", e.target.value)}
-                    placeholder="Tell us what you're looking for..."
-                  />
-                </div>
+              <div className="contact__field">
+                <label htmlFor="name">
+                  Name
+                </label>
+
+                <input
+                  id="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={form.name}
+                  onChange={handleChange("name")}
+                />
               </div>
 
-              <button className="form-submit" type="submit">
-                <Send size={15} />
-                Send inquiry on WhatsApp
-              </button>
-            </form>
-          </Reveal>
+              <div className="contact__field">
+                <label htmlFor="phone">
+                  Phone
+                </label>
+
+                <input
+                  id="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  required
+                  value={form.phone}
+                  onChange={handleChange("phone")}
+                />
+              </div>
+
+            </div>
+
+            <div className="contact__row">
+
+              <div className="contact__field">
+                <label htmlFor="email">
+                  Email
+                </label>
+
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={form.email}
+                  onChange={handleChange("email")}
+                />
+              </div>
+
+              <div className="contact__field">
+                <label htmlFor="interest">
+                  Interest
+                </label>
+
+                <select
+                  id="interest"
+                  required
+                  value={form.interest}
+                  onChange={handleChange("interest")}
+                >
+                  <option
+                    value=""
+                    disabled
+                  >
+                    Select an option
+                  </option>
+
+                  {INTEREST_OPTIONS.map(
+                    (option) => (
+                      <option
+                        key={option}
+                        value={option}
+                      >
+                        {option}
+                      </option>
+                    )
+                  )}
+                </select>
+              </div>
+
+            </div>
+
+            <div className="contact__field">
+
+              <label htmlFor="message">
+                Message
+              </label>
+
+              <textarea
+                id="message"
+                rows={5}
+                required
+                value={form.message}
+                onChange={handleChange("message")}
+              />
+
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn--gold contact__submit"
+            >
+              Send Inquiry
+            </button>
+
+          </motion.form>
+
         </div>
+
       </div>
 
       <AnimatePresence>
-        {toast && (
+        {submitted && (
           <motion.div
             className="toast"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
+            initial={{
+              opacity: 0,
+              y: 25,
+              x: "-50%",
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              x: "-50%",
+            }}
+            exit={{
+              opacity: 0,
+              y: 15,
+              x: "-50%",
+            }}
+            transition={{
+              duration: .3,
+            }}
+            role="status"
           >
-            <Check size={15} />
-            WhatsApp inquiry opened successfully
+            <Check size={18} />
+
+            <span>
+              Your inquiry is ready in WhatsApp.
+              Prime Property &amp; Developers will
+              be able to respond directly.
+            </span>
           </motion.div>
         )}
       </AnimatePresence>
+
     </section>
   );
 }
@@ -3537,238 +6223,391 @@ ${form.message || "I would like to discuss a property opportunity."}
 ============================================================ */
 
 function Footer() {
+  const handleFooterNav = (
+    event,
+    id
+  ) => {
+    event.preventDefault();
+    scrollToId(id);
+  };
+
   return (
     <footer className="footer">
-      <div className="container">
-        <div className="footer-grid">
-          <div className="footer-brand">
-            <div className="brand">
-              <div className="brand-mark">
-                <span>PP</span>
-              </div>
 
-              <div className="brand-text">
-                <strong>Prime Property</strong>
-                <small>& Developers</small>
-              </div>
-            </div>
+      <div className="container footer__top">
 
-            <p>
-              Premium property solutions for Islamabad's residential,
-              commercial and investment market.
-            </p>
+        <div className="footer__brand">
 
-            <div className="socials">
-              <a
-                className="social"
-                href={COMPANY.facebook}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Facebook"
-              >
-                <Facebook size={15} />
-              </a>
-
-              <a
-                className="social"
-                href={COMPANY.instagram}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Instagram"
-              >
-                <Instagram size={15} />
-              </a>
-
-              <a
-                className="social"
-                href={COMPANY.twitter}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Twitter"
-              >
-                <ArrowUpRight size={15} />
-              </a>
-            </div>
-          </div>
-
-          <div>
-            <div className="footer-title">Explore</div>
-
-            <div className="footer-links">
-              <a href="#home">Home</a>
-              <a href="#properties">Properties</a>
-              <a href="#services">Services</a>
-              <a href="#areas">Areas</a>
-            </div>
-          </div>
-
-          <div>
-            <div className="footer-title">Services</div>
-
-            <div className="footer-links">
-              <a href="#services">Property Sales</a>
-              <a href="#services">Property Rentals</a>
-              <a href="#services">Investment Advisory</a>
-              <a href="#services">Consultancy</a>
-            </div>
-          </div>
-
-          <div>
-            <div className="footer-title">Contact</div>
-
-            <div className="footer-links">
-              <a href={`tel:+${COMPANY.phoneIntl}`}>
-                {COMPANY.phone}
-              </a>
-
-              <a href={`mailto:${COMPANY.email}`}>
-                {COMPANY.email}
-              </a>
-
-              <a href="#contact">Islamabad, Pakistan</a>
-            </div>
-          </div>
-        </div>
-
-        <div className="footer-bottom">
-          <span>
-            © {new Date().getFullYear()} {COMPANY.legalName}
+          <span className="navbar__brand-mark">
+            PP
           </span>
 
-          <span>Designed with a Prime standard.</span>
+          <h3>
+            {COMPANY.legalName}
+          </h3>
+
+          <p>
+            Find your prime address.
+          </p>
+
         </div>
+
+        <div className="footer__col">
+
+          <h4>Company</h4>
+
+          <ul>
+            {NAV_LINKS.map((link) => (
+              <li key={link.id}>
+                <a
+                  href={`#${link.id}`}
+                  onClick={(event) =>
+                    handleFooterNav(
+                      event,
+                      link.id
+                    )
+                  }
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+        </div>
+
+        <div className="footer__col">
+
+          <h4>Services</h4>
+
+          <ul>
+            <li>Property Sales</li>
+            <li>Property Purchase</li>
+            <li>Rentals</li>
+            <li>Investment Consultancy</li>
+          </ul>
+
+        </div>
+
+        <div className="footer__col">
+
+          <h4>Contact</h4>
+
+          <ul>
+            <li>
+              <a
+                href={`tel:+${COMPANY.phoneIntl}`}
+              >
+                {COMPANY.phone}
+              </a>
+            </li>
+
+            <li>
+              <a
+                href={`mailto:${COMPANY.email}`}
+              >
+                {COMPANY.email}
+              </a>
+            </li>
+
+            <li>
+              Islamabad, Pakistan
+            </li>
+          </ul>
+
+        </div>
+
       </div>
+
+      <div className="container footer__bottom">
+
+        <p>
+          &copy; 2026{" "}
+          {COMPANY.legalName}.
+          All rights reserved.
+        </p>
+
+        <div className="footer__social">
+
+          <a
+            href="https://www.facebook.com/Primepropertyanddevelopers"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook"
+          >
+            <Facebook size={17} />
+          </a>
+
+          <a
+            href="https://www.instagram.com/prime_property.developers/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+          >
+            <Instagram size={17} />
+          </a>
+
+          <a
+            href="https://x.com/PrimeProperty7"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="X"
+          >
+            <Twitter size={17} />
+          </a>
+
+          <a
+            href="https://www.tiktok.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="TikTok"
+          >
+            <Music2 size={17} />
+          </a>
+
+        </div>
+
+      </div>
+
     </footer>
   );
 }
 
 /* ============================================================
-   FLOATING ACTIONS
+   WHATSAPP FLOAT
 ============================================================ */
 
-function FloatingActions() {
-  const [showTop, setShowTop] = useState(false);
-
-  useEffect(() => {
-    const handle = () => setShowTop(window.scrollY > 500);
-
-    handle();
-
-    window.addEventListener("scroll", handle, { passive: true });
-
-    return () => window.removeEventListener("scroll", handle);
-  }, []);
-
+function WhatsAppFloat() {
   return (
-    <div className="floating-actions">
-      <motion.a
-        href={WA()}
-        target="_blank"
-        rel="noreferrer"
-        className="float-btn whatsapp"
-        aria-label="WhatsApp"
-        animate={{ y: [0, -4, 0] }}
-        transition={{ duration: 2.2, repeat: Infinity }}
-      >
-        <MessageCircle size={21} />
-      </motion.a>
+    <a
+      href={waLink(
+        WHATSAPP_DEFAULT_MESSAGE
+      )}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="whatsapp-float"
+      aria-label="Chat with Prime Property on WhatsApp"
+    >
 
-      <AnimatePresence>
-        {showTop && (
-          <motion.button
-            className="float-btn top-btn"
-            initial={{ opacity: 0, scale: .7 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: .7 }}
-            onClick={() =>
-              window.scrollTo({ top: 0, behavior: "smooth" })
-            }
-            aria-label="Back to top"
-          >
-            <ArrowDown
-              size={19}
-              style={{ transform: "rotate(180deg)" }}
-            />
-          </motion.button>
-        )}
-      </AnimatePresence>
-    </div>
+      <span
+        className="whatsapp-float__pulse"
+        aria-hidden="true"
+      />
+
+      <MessageCircle size={25} />
+
+      <span className="whatsapp-float__tooltip">
+        Chat with us
+      </span>
+
+    </a>
   );
 }
 
 /* ============================================================
-   APP
+   BACK TO TOP
+============================================================ */
+
+function BackToTop() {
+  const show =
+    useScrollFlag(600);
+
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.button
+          type="button"
+          className="back-to-top"
+          aria-label="Back to top"
+          initial={{
+            opacity: 0,
+            y: 15,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          exit={{
+            opacity: 0,
+            y: 15,
+          }}
+          transition={{
+            duration: .22,
+          }}
+          onClick={() =>
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            })
+          }
+        >
+          <ArrowUp size={19} />
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ============================================================
+   MAIN APP
 ============================================================ */
 
 export default function App() {
-  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [menuOpen,setMenuOpen] =
+    useState(false);
 
-  const [filters, setFilters] = useState({
-    purpose: "Buy",
-    type: "All",
-    location: "All",
-  });
+  const [filters,setFilters] =
+    useState({
+      purpose: "",
+      type: "",
+      location: "",
+    });
 
-  const { scrollYProgress } = useScroll();
+  const [
+    selectedProperty,
+    setSelectedProperty,
+  ] = useState(null);
 
-  const handleSearch = (newFilters) => {
-    setFilters(newFilters);
+  const resultsRef =
+    useRef(null);
 
-    setTimeout(() => {
-      scrollToId("properties");
-    }, 100);
+  /* Lock page scrolling when mobile menu
+     or property modal is active. */
+  useEffect(() => {
+    if (
+      menuOpen ||
+      selectedProperty
+    ) {
+      document.body.style.overflow =
+        "hidden";
+    } else {
+      document.body.style.overflow =
+        "";
+    }
+
+    return () => {
+      document.body.style.overflow =
+        "";
+    };
+  }, [
+    menuOpen,
+    selectedProperty,
+  ]);
+
+  /* Close mobile menu with Escape */
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (
+        event.key === "Escape" &&
+        menuOpen
+      ) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+    return () => {
+      document.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+    };
+  }, [menuOpen]);
+
+  const handleSearch = () => {
+    if (!resultsRef.current) {
+      return;
+    }
+
+    resultsRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   return (
-    <div className="app">
+    <div className="pp-root">
+
       <GlobalStyles />
 
-      <motion.div
-        className="progress"
-        style={{ scaleX: scrollYProgress }}
+      <div
+        className="grain"
+        aria-hidden="true"
       />
 
-      <Navbar />
+      <ScrollProgressBar />
 
-      <Hero />
-
-      <SearchBox onSearch={handleSearch} />
-
-      <Marquee />
-
-      <Stats />
-
-      <FeaturedProperties
-        filters={filters}
-        onSelect={setSelectedProperty}
+      <Navbar
+        menuOpen={menuOpen}
+        onOpenMenu={() =>
+          setMenuOpen(true)
+        }
+        onCloseMenu={() =>
+          setMenuOpen(false)
+        }
       />
 
-      <About />
+      <main>
 
-      <Services />
+        <Hero
+          filters={filters}
+          setFilters={setFilters}
+          onSearch={handleSearch}
+        />
 
-      <Areas />
+        <Marquee />
 
-      <Testimonials />
+        <Stats />
 
-      <Process />
+        <TrustSection />
 
-      <InvestmentCTA />
+        <FeaturedProperties
+          filters={filters}
+          onView={setSelectedProperty}
+          resultsRef={resultsRef}
+        />
 
-      <Contact />
+        <Services />
+
+        <WhyPrime />
+
+        <Areas />
+
+        <Testimonials />
+
+        <Cinematic />
+
+        <Process />
+
+        <InvestmentCTA />
+
+        <About />
+
+        <Contact />
+
+      </main>
 
       <Footer />
 
-      <FloatingActions />
+      <WhatsAppFloat />
+
+      <BackToTop />
 
       <AnimatePresence>
         {selectedProperty && (
           <PropertyModal
             property={selectedProperty}
-            onClose={() => setSelectedProperty(null)}
+            onClose={() =>
+              setSelectedProperty(null)
+            }
           />
         )}
       </AnimatePresence>
+
     </div>
   );
 }
